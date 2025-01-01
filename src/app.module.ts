@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { UserModule } from '@entities/user/user.module';
+import { OrderModule } from '@entities/order/order.module';
 import { TypeOrmModule } from '@db/typeorm.module';
 import { ConfigModule } from './config.module';
 
 @Module({
-  imports: [ConfigModule, TypeOrmModule, UserModule],
+  imports: [ConfigModule, TypeOrmModule, UserModule, OrderModule],
 })
 export class AppModule {}

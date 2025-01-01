@@ -9,12 +9,11 @@ import {
   Param,
   ParseIntPipe,
   Body,
-  Patch,
   UseInterceptors,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { UserService } from '@entities/user/user.service';
+import { UserService } from '@entities/user/service/user.service';
 import { UpdateUserDto } from '@entities/user/dto/updateUser.dto';
 
 @Controller('users')
@@ -54,10 +53,6 @@ export class UserController {
     await this.userService.updateUserData(id, body);
     return res.send({ status: 'ok' });
   }
-
-  @Patch('/')
-  async updateUserField(@Req() req: Request, @Res() res: Response) {}
-
   @Delete('/:id')
   async deleteUser(
     @Param('id', ParseIntPipe) id: number,

@@ -1,13 +1,12 @@
 import {
   IsEmail,
   IsEnum,
-  IsISO8601,
   IsNotEmpty,
+  IsPhoneNumber,
   IsString,
   MinLength,
 } from 'class-validator';
-
-import { E_Gender } from '@entities/user/types';
+import { E_UserType } from '@entities/user/models/types';
 
 export class UpdateUserDto {
   @IsEmail()
@@ -15,16 +14,13 @@ export class UpdateUserDto {
 
   @IsString()
   @MinLength(1)
-  nameFirst: string;
+  name: string;
 
   @IsString()
-  @MinLength(1)
-  nameLast: string;
-
-  @IsISO8601()
-  birthDate: Date;
+  @IsPhoneNumber()
+  phone: string;
 
   @IsNotEmpty()
-  @IsEnum(E_Gender)
-  gender: E_Gender;
+  @IsEnum(E_UserType)
+  userType: E_UserType;
 }
