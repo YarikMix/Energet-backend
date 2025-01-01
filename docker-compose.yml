@@ -1,0 +1,43 @@
+version: '3.5'
+
+services:
+  api:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+    ports:
+      - "8080:3000"
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: nest_test
+      POSTGRES_PASSWORD: nest_test
+      POSTGRES_DB: nest_test
+      PGDATA: /data/postgres
+    volumes:
+       - postgres:/var/www/nest_test/docker-volumes/postgres
+    ports:
+      - "127.0.0.1:5432:5432"
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: nest_test@admin.com
+      PGADMIN_DEFAULT_PASSWORD: nest_test
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+       - pgadmin:/var/www/nest_test/docker-volumes/pgadmin
+    ports:
+      - "127.0.0.1:5050:80"
+    restart: unless-stopped
+
+volumes:
+  postgres:
+  pgadmin:
