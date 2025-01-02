@@ -5,11 +5,8 @@ import { E_ItemStatus } from '@entities/items/models/types';
 
 export class UpdateItemDto extends PartialType(CreateItemDto) {
   @Column({
-    name: 'status',
     type: 'enum',
     enum: E_ItemStatus,
-    nullable: false,
-    default: E_ItemStatus.Created,
   })
   status: E_ItemStatus;
 }

@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { E_OrderStatus } from '@entities/order/models/types';
+import { User } from '@entities/user/models/user.entity';
 
 @Entity('orders')
 export class Order {
@@ -20,4 +21,7 @@ export class Order {
     default: E_OrderStatus.Draft,
   })
   status: E_OrderStatus;
+
+  @OneToMany(() => User, (user) => user)
+  owner: User;
 }
