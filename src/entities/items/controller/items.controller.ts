@@ -46,4 +46,20 @@ export class ItemsController {
   remove(@Param('id') id: string) {
     return this.itemsService.remove(+id);
   }
+
+  @Post('/:item_id/add_to_order/:order_id')
+  addToOrder(
+    @Param('item_id', ParseIntPipe) item_id: number,
+    @Param('order_id', ParseIntPipe) order_id: number,
+  ) {
+    return this.itemsService.addItemTodOrder(item_id, order_id);
+  }
+
+  @Post('/:item_id/delete_from_order/:order_id')
+  deleteFromOrder(
+    @Param('item_id', ParseIntPipe) item_id: number,
+    @Param('order_id', ParseIntPipe) order_id: number,
+  ) {
+    return this.itemsService.deleteItemFromOrder(item_id, order_id);
+  }
 }
