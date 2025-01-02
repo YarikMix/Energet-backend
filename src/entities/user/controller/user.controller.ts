@@ -2,8 +2,6 @@ import {
   Controller,
   Get,
   Post,
-  Req,
-  Res,
   Put,
   Delete,
   Param,
@@ -11,55 +9,47 @@ import {
   Body,
   UseInterceptors,
 } from '@nestjs/common';
-import { Response, Request } from 'express';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from '@entities/user/service/user.service';
 import { UpdateUserDto } from '@entities/user/dto/updateUser.dto';
+import { NotFoundInterceptor } from '@interceptors/interceptors';
+import { RegisterUserDto } from '@entities/user/dto/registerUser.dto';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('/')
-  async getAllUsers(@Req() req: Request, @Res() res: Response) {
-    const usersData = await this.userService.getUsers();
-    return res.send({ data: usersData });
+  getAllUsers() {
+    return this.userService.getUsers();
   }
 
   @Get('/:id')
-  async getUser(
-    @Req() req: Request,
-    @Param('id', ParseIntPipe) id: number,
-    @Res() res: Response,
-  ) {
-    const userData = await this.userService.getUserData(id);
-    delete userData.password;
-    return res.send({ data: userData });
+  @UseInterceptors(NotFoundInterceptor)
+  getUser(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.getUser(id);
   }
 
-  @Post('/')
-  @UseInterceptors(FileInterceptor(''))
-  async createUser(@Req() req: Request, @Res() res: Response) {
-    await this.userService.createUser(req.body);
-    return res.status(200).send('created');
+  @Post('/register')
+  async registerUser(@Body() body: RegisterUserDto) {
+    return this.userService.createUser(body);
   }
+
+  // @Post('/auth')
+  // async authUser(@Body() body: LoginUserDto) {
+  //   return this.userService.getUsers(body);
+  // }
 
   @Put('/:id')
-  async updateUser(
+  // @UseInterceptors(FileInterceptor(''))
+  updateUser(
+    @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateUserDto,
-    @Param('id', ParseIntPipe) id: number,
-    @Res() res: Response,
   ) {
-    await this.userService.updateUserData(id, body);
-    return res.send({ status: 'ok' });
+    return this.userService.updateUserData(id, body);
   }
+
   @Delete('/:id')
-  async deleteUser(
-    @Param('id', ParseIntPipe) id: number,
-    @Req() req: Request,
-    @Res() res: Response,
-  ) {
-    await this.userService.deleteUser(id);
-    return res.send({ status: 'ok' });
+  deleteUser(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.deleteUser(id);
   }
 }

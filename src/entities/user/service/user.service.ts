@@ -12,7 +12,7 @@ export class UserService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
-  availableFields = ['name', 'phone', 'email', 'userType'];
+  availableFields = ['name', 'phone', 'email', 'role'];
 
   private filterFields(body: { [k: string]: any }) {
     const filteredBody: { [k: string]: any } = {};
@@ -37,7 +37,7 @@ export class UserService {
     return await this.userRepository.save(newUser);
   }
 
-  public async getUserData(id: number) {
+  public async getUser(id: number) {
     return await this.userRepository.findOne({
       where: { id },
       select: [...(this.availableFields as any), 'id'],
@@ -46,7 +46,6 @@ export class UserService {
 
   public async updateUserData(id: number, body: UpdateUserDto) {
     const data = this.filterFields(body);
-    console.log(Object.keys(data).length);
     if (!Object.keys(data).length) {
       return null;
     }

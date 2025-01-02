@@ -22,5 +22,5 @@ export class UpdateUserDto {
 
   @IsNotEmpty()
   @IsEnum(E_UserType)
-  userType: E_UserType;
+  role: E_UserType;
 }

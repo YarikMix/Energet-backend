@@ -19,10 +19,10 @@ export class User {
   phone: string;
 
   @Column({
-    name: 'userEntity',
+    name: 'role',
     type: 'enum',
     enum: E_UserType,
     nullable: true,
   })
-  userType: E_UserType | null;
+  role: E_UserType | null;
 }
