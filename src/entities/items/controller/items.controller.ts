@@ -13,11 +13,13 @@ import { ItemsService } from '../service/items.service';
 import { CreateItemDto } from '../dto/createItem.dto';
 import { UpdateItemDto } from '../dto/updateItem.dto';
 import { NotFoundInterceptor } from '@interceptors/interceptors';
+import { Public } from '@services/auth/decorators/public.decorator';
 
 @Controller('items')
 export class ItemsController {
   constructor(private readonly itemsService: ItemsService) {}
 
+  @Public()
   @Get('/')
   searchItems() {
     return this.itemsService.findAll();

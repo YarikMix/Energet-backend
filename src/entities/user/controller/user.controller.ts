@@ -1,7 +1,6 @@
 import {
   Controller,
   Get,
-  Post,
   Put,
   Delete,
   Param,
@@ -9,35 +8,24 @@ import {
   Body,
   UseInterceptors,
 } from '@nestjs/common';
-import { UserService } from '@entities/user/service/user.service';
 import { UpdateUserDto } from '@entities/user/dto/updateUser.dto';
 import { NotFoundInterceptor } from '@interceptors/interceptors';
-import { RegisterUserDto } from '@entities/user/dto/registerUser.dto';
+import { UsersService } from '@entities/user/service/user.service';
 
 @Controller('users')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly usersService: UsersService) {}
 
   @Get('/')
   getAllUsers() {
-    return this.userService.getUsers();
+    return this.usersService.getUsers();
   }
 
   @Get('/:id')
   @UseInterceptors(NotFoundInterceptor)
   getUser(@Param('id', ParseIntPipe) id: number) {
-    return this.userService.getUser(id);
+    return this.usersService.getUser(id);
   }
-
-  @Post('/register')
-  async registerUser(@Body() body: RegisterUserDto) {
-    return this.userService.createUser(body);
-  }
-
-  // @Post('/auth')
-  // async authUser(@Body() body: LoginUserDto) {
-  //   return this.userService.getUsers(body);
-  // }
 
   @Put('/:id')
   // @UseInterceptors(FileInterceptor(''))
@@ -45,11 +33,11 @@ export class UserController {
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateUserDto,
   ) {
-    return this.userService.updateUserData(id, body);
+    return this.usersService.updateUserData(id, body);
   }
 
   @Delete('/:id')
   deleteUser(@Param('id', ParseIntPipe) id: number) {
-    return this.userService.deleteUser(id);
+    return this.usersService.deleteUser(id);
   }
 }

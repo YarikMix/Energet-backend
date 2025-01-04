@@ -1,13 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { genSalt, hash } from 'bcrypt';
 
 import { User } from '../models/user.entity';
 import { UpdateUserDto } from '@entities/user/dto/updateUser.dto';
 
 @Injectable()
-export class UserService {
+export class UsersService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
@@ -26,14 +25,8 @@ export class UserService {
     return filteredBody;
   }
 
-  public async createUser(userData: any) {
-    const salt = await genSalt(10);
-    const hashedPassword = await hash(userData.password, salt);
-
-    const newUser = this.userRepository.create({
-      ...userData,
-      password: hashedPassword,
-    });
+  public async create(userData: User) {
+    const newUser = this.userRepository.create(userData);
     return await this.userRepository.save(newUser);
   }
 
@@ -61,5 +54,11 @@ export class UserService {
 
   public async deleteUser(id: number) {
     return await this.userRepository.delete(id);
+  }
+
+  public async findOneByEmail(email: string) {
+    return await this.userRepository.findOne({
+      where: [{ email: email }],
+    });
   }
 }

@@ -13,7 +13,9 @@
     "paths": {
       "@db/*": ["src/db/*"],
       "@entities/*": ["src/entities/*"],
-      "@interceptors/*": ["src/interceptors/*"]
+      "@interceptors/*": ["src/interceptors/*"],
+      "@services/*": ["src/services/*"],
+      "@guards/*": ["src/guards/*"]
     },
     "incremental": true,
     "skipLibCheck": true,
