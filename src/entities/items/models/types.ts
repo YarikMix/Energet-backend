@@ -1,5 +1,5 @@
 export enum E_ItemStatus {
   Created = 0,
-  Confirmed,
-  Deleted
+  Confirmed = 1,
+  Deleted = 2,
 }

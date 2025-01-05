@@ -7,6 +7,7 @@ import { OrderItem } from '@entities/order/models/order-item.entity';
 import { faker } from '@faker-js/faker';
 import { E_OrderStatus } from '@entities/order/models/types';
 import { E_UserType } from '@entities/user/models/types';
+import { MinioService } from '@services/minio/minio.service';
 
 export class MainSeeder implements Seeder {
   public async run(
@@ -54,15 +55,31 @@ export class MainSeeder implements Seeder {
     console.log('seeding items');
     const itemFactory = factoryManager.get(Item);
     const itemsRepo = dataSource.getRepository(Item);
+
+    const images = ['1.jpg', '2.jpg', '3.jpg', '4.jpg'];
+
     const items = await Promise.all(
       Array(10)
         .fill('')
         .map(async () => {
           return await itemFactory.make({
+            image:
+              'http://localhost:9000/images/items/' +
+              faker.helpers.arrayElement(images),
             owner: faker.helpers.arrayElement(producers),
           });
         }),
     );
+
+    const minio = new MinioService();
+    await minio.uploadLocalFile('items', 'default.jpg', 'src/assets/1.jpg');
+    await Promise.all(
+      images.map(
+        async (image) =>
+          await minio.uploadLocalFile('items', image, 'src/assets/1.jpg'),
+      ),
+    );
+
     return await itemsRepo.save(items);
   };
 

@@ -3,21 +3,28 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   UseInterceptors,
   ParseIntPipe,
+  UploadedFile,
+  BadRequestException,
+  Put,
 } from '@nestjs/common';
 import { ItemsService } from '../service/items.service';
 import { CreateItemDto } from '../dto/createItem.dto';
 import { UpdateItemDto } from '../dto/updateItem.dto';
 import { NotFoundInterceptor } from '@interceptors/interceptors';
 import { Public } from '@services/auth/decorators/public.decorator';
+import { MinioService } from '@services/minio/minio.service';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('items')
 export class ItemsController {
-  constructor(private readonly itemsService: ItemsService) {}
+  constructor(
+    private readonly itemsService: ItemsService,
+    private readonly minioService: MinioService,
+  ) {}
 
   @Public()
   @Get('/')
@@ -31,17 +38,48 @@ export class ItemsController {
     return this.itemsService.findOne(id);
   }
 
+  @Public()
   @Post('/')
-  create(@Body() createItemDto: CreateItemDto) {
-    return this.itemsService.create(createItemDto);
+  @UseInterceptors(FileInterceptor('file'))
+  async create(
+    @Body() createItemDto: CreateItemDto,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    const item = await this.itemsService.create(
+      createItemDto,
+      file && file.originalname,
+    );
+
+    if (file) await this.minioService.uploadFile(`/items/${item.id}/`, file);
+
+    return item;
   }
 
-  @Patch('/:id')
+  @Public()
+  @Put('/:id/update/')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateItemDto: UpdateItemDto,
   ) {
     return this.itemsService.update(id, updateItemDto);
+  }
+
+  @Public()
+  @Put('/:id/update_image/')
+  @UseInterceptors(FileInterceptor('file'))
+  async updateImage(
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new BadRequestException();
+    }
+
+    await this.minioService.uploadFile(`/items/${id}/`, file);
+
+    await this.itemsService.updateImage(id, file.originalname);
+
+    return this.itemsService.findOne(id);
   }
 
   @Delete('/:id')

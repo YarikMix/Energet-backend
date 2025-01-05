@@ -22,6 +22,13 @@ export class Item {
   })
   status: E_ItemStatus;
 
+  @Column({
+    name: 'image',
+    type: 'varchar',
+    default: 'http://localhost:9000/images/items/default.jpg',
+  })
+  image: string;
+
   @ManyToOne(() => User, (user) => user)
   owner: User;
 }

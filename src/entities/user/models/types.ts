@@ -1,5 +1,5 @@
 export enum E_UserType {
   Buyer = 0,
-  Producer,
-  Moderator
+  Producer = 1,
+  Moderator = 2,
 }

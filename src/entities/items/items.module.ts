@@ -5,10 +5,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Item } from '@entities/items/models/item.entity';
 import { Order } from '@entities/order/models/order.entity';
 import { OrderItem } from '@entities/order/models/order-item.entity';
+import { MinioService } from '@services/minio/minio.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Item, OrderItem, Order])],
   controllers: [ItemsController],
-  providers: [ItemsService],
+  providers: [ItemsService, MinioService],
 })
 export class ItemsModule {}

@@ -7,6 +7,7 @@ import { ItemsModule } from '@entities/items/items.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtGuard } from '@services/auth/guards/jwt.guard';
 import { AuthModule } from '@services/auth/auth.module';
+import { MinioService } from '@services/minio/minio.service';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { AuthModule } from '@services/auth/auth.module';
       provide: APP_GUARD,
       useClass: JwtGuard,
     },
+    MinioService,
   ],
 })
 export class AppModule {}

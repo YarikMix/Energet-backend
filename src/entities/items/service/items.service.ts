@@ -41,9 +41,22 @@ export class ItemsService {
     return await this.itemRepository.update({ id }, updateItemDto);
   }
 
-  async create(createItemDto: CreateItemDto) {
-    const newItem = this.itemRepository.create(createItemDto);
-    return await this.itemRepository.save(newItem);
+  async create(createItemDto: CreateItemDto, fileName?: string) {
+    const itemData = this.itemRepository.create(createItemDto);
+
+    const item = await this.itemRepository.save(itemData);
+
+    if (fileName) {
+      item.image = `http://localhost:9000/images/items/${item.id}/${fileName}`;
+    }
+
+    return item;
+  }
+
+  async updateImage(itemId: number, fileName?: string) {
+    return await this.itemRepository.update(itemId, {
+      image: `http://localhost:9000/images/items/${itemId}/${fileName}`,
+    });
   }
 
   async addItemTodOrder(itemId: number, orderId: number) {

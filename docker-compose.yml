@@ -6,18 +6,21 @@ services:
       dockerfile: Dockerfile
       context: .
     command: bash -c "npm run seed && npm run start:dev"
+#    command: npm run start:dev
     environment:
       NODE_ENV: development
       PORT: 3000
+#    network_mode: "host"
+    volumes:
+      - ./src:/app/src
     ports:
       - "8000:3000"
     depends_on:
       - postgres
-    volumes:
-      - ./src:/app/src
+      - minio
 
   postgres:
-    image: postgres:14
+    image: postgres:15.0
     environment:
       POSTGRES_USER: nest_test
       POSTGRES_PASSWORD: nest_test
@@ -26,7 +29,7 @@ services:
     volumes:
        - postgres:/var/www/nest_test/docker-volumes/postgres
     ports:
-      - "127.0.0.1:5432:5432"
+      - "5432:5432"
     restart: unless-stopped
 
   pgadmin:
@@ -42,6 +45,36 @@ services:
       - "127.0.0.1:5050:80"
     restart: unless-stopped
 
+  minio:
+    image: minio/minio:latest
+    command: server --console-address ":9001" /data/
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: minio123
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    volumes:
+      - minio-data:/data
+
+  createbucket:
+    image: minio/mc:latest
+    container_name: createbucket
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host add --api s3v4 s3 http://minio:9000 minio minio123;
+      /usr/bin/mc mb s3/images;
+      /usr/bin/mc anonymous set public s3/images;
+      "
+
 volumes:
   postgres:
   pgadmin:
+  minio-data:
