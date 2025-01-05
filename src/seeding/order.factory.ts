@@ -1,9 +1,9 @@
 import { setSeederFactory } from 'typeorm-extension';
 import { Order } from '@entities/order/models/order.entity';
-import { Faker } from '@faker-js/faker';
+import { faker } from '@faker-js/faker';
 import { E_OrderStatus } from '@entities/order/models/types';
 
-export const OrderFactory = setSeederFactory(Order, (faker: Faker) => {
+export const OrderFactory = setSeederFactory(Order, () => {
   const order = new Order();
   order.status = faker.helpers.arrayElement([
     E_OrderStatus.InWork,
