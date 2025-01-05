@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { E_ItemStatus } from '@entities/items/models/types';
+import { User } from '@entities/user/models/user.entity';
 
 @Entity('items')
 export class Item {
@@ -20,4 +21,7 @@ export class Item {
     default: E_ItemStatus.Created,
   })
   status: E_ItemStatus;
+
+  @ManyToOne(() => User, (user) => user)
+  owner: User;
 }

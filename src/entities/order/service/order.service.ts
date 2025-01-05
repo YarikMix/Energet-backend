@@ -15,7 +15,10 @@ export class OrderService {
   ) {}
 
   public async getOrders() {
-    return await this.orderRepository.find();
+    return await this.orderRepository.find({
+      relations: ['owner'],
+      loadRelationIds: true,
+    });
   }
 
   async getOrder(id: number) {
@@ -23,6 +26,8 @@ export class OrderService {
       where: { orderId: id },
     });
     const order = await this.orderRepository.findOne({
+      relations: ['owner'],
+      loadRelationIds: true,
       where: { id },
     });
 

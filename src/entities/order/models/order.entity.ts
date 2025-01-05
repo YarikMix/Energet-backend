@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { E_OrderStatus } from '@entities/order/models/types';
 import { User } from '@entities/user/models/user.entity';
 
@@ -22,6 +22,6 @@ export class Order {
   })
   status: E_OrderStatus;
 
-  @OneToMany(() => User, (user) => user)
+  @ManyToOne(() => User, (user) => user)
   owner: User;
 }

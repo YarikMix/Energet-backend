@@ -13,16 +13,19 @@ import { Request } from 'express';
 import { OrderService } from '@entities/order/service/order.service';
 import { UpdateOrderDto } from '@entities/order/dto/updateOrder.dto';
 import { NotFoundInterceptor } from '@interceptors/interceptors';
+import { Public } from '@services/auth/decorators/public.decorator';
 
 @Controller('orders')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
+  @Public()
   @Get('/')
   getAllOrders() {
     return this.orderService.getOrders();
   }
 
+  @Public()
   @Get('/:id')
   @UseInterceptors(NotFoundInterceptor)
   getOrder(@Req() req: Request, @Param('id', ParseIntPipe) id: number) {

@@ -11,11 +11,13 @@ import {
 import { UpdateUserDto } from '@entities/user/dto/updateUser.dto';
 import { NotFoundInterceptor } from '@interceptors/interceptors';
 import { UsersService } from '@entities/user/service/user.service';
+import { Public } from '@services/auth/decorators/public.decorator';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly usersService: UsersService) {}
 
+  @Public()
   @Get('/')
   getAllUsers() {
     return this.usersService.getUsers();

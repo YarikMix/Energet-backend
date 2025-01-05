@@ -19,12 +19,17 @@ export class ItemsService {
   ) {}
 
   async findAll() {
-    return await this.itemRepository.find();
+    return await this.itemRepository.find({
+      relations: ['owner'],
+      loadRelationIds: true,
+    });
   }
 
   async findOne(id: number) {
     return await this.itemRepository.find({
       where: { id },
+      relations: ['owner'],
+      loadRelationIds: true,
     });
   }
 
