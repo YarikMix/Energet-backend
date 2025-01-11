@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateItemDto } from '../dto/createItem.dto';
 import { UpdateItemDto } from '../dto/updateItem.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { Item } from '@entities/items/models/item.entity';
 import { OrderItem } from '@entities/order/models/order-item.entity';
 import { Order } from '@entities/order/models/order.entity';
@@ -18,10 +18,13 @@ export class ItemsService {
     private readonly orderRepository: Repository<Order>,
   ) {}
 
-  async findAll() {
+  async search({ name }) {
     return await this.itemRepository.find({
       relations: ['owner'],
       loadRelationIds: true,
+      where: {
+        name: ILike(`%${name}%`),
+      },
     });
   }
 

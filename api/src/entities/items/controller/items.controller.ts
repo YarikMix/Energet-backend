@@ -10,6 +10,7 @@ import {
   UploadedFile,
   BadRequestException,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ItemsService } from '../service/items.service';
 import { CreateItemDto } from '../dto/createItem.dto';
@@ -28,8 +29,8 @@ export class ItemsController {
 
   @Public()
   @Get('/')
-  searchItems() {
-    return this.itemsService.findAll();
+  searchItems(@Query() params) {
+    return this.itemsService.search({ name: params.name });
   }
 
   @Get('/:id')

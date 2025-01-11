@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { UsersModule } from '@entities/user/user.module';
 import { OrderModule } from '@entities/order/order.module';
 import { TypeOrmModule } from '@db/typeorm.module';
@@ -8,6 +8,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtGuard } from '@services/auth/guards/jwt.guard';
 import { AuthModule } from '@services/auth/auth.module';
 import { MinioService } from '@services/minio/minio.service';
+import { AppLoggerMiddleware } from './middleware/logger';
 
 @Module({
   imports: [
@@ -26,4 +27,8 @@ import { MinioService } from '@services/minio/minio.service';
     MinioService,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(AppLoggerMiddleware).forRoutes('*');
+  }
+}
