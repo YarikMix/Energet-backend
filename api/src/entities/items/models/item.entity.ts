@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { E_ItemStatus } from '@entities/items/models/types';
+import { E_ItemStatus, E_ItemType } from '@entities/items/models/types';
 import { User } from '@entities/user/models/user.entity';
 
 @Entity('items')
@@ -7,8 +7,11 @@ export class Item {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'email', type: 'varchar' })
+  @Column({ name: 'name', type: 'varchar' })
   name: string;
+
+  @Column({ name: 'type', type: 'enum', enum: E_ItemType, nullable: true })
+  type: E_ItemType;
 
   @Column({ name: 'password', type: 'int' })
   price: number;
@@ -17,7 +20,6 @@ export class Item {
     name: 'status',
     type: 'enum',
     enum: E_ItemStatus,
-    nullable: false,
     default: E_ItemStatus.Created,
   })
   status: E_ItemStatus;

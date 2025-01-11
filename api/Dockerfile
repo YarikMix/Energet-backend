@@ -1,7 +1,7 @@
 FROM node:18
 
 # Create app directory, this is in our container/in our image
-WORKDIR /app
+WORKDIR /app/api
 
 # Install app dependencies
 # A wildcard is used to ensure both package.json AND package-lock.json are copied

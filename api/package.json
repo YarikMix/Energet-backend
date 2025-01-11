@@ -19,7 +19,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "prettier": "prettier --write \"**/*.ts\"",
-    "seed": "ts-node -r tsconfig-paths/register src/seeding/seed.ts"
+    "seed": "ts-node -r tsconfig-paths/register ./src/seeding/seed.ts"
   },
   "dependencies": {
     "@faker-js/faker": "^9.3.0",
@@ -43,6 +43,7 @@
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.4.7",
     "i": "^0.3.7",
+    "lodash": "^4.17.21",
     "minio": "^8.0.3",
     "npm": "^11.0.0",
     "passport-jwt": "^4.0.1",
@@ -59,6 +60,7 @@
     "@nestjs/testing": "^10.0.0",
     "@types/bcrypt": "^5.0.2",
     "@types/jest": "^29.5.2",
+    "@types/lodash": "^4.17.14",
     "@types/node": "^20.3.1",
     "@types/supertest": "^6.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",

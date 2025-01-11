@@ -4,7 +4,7 @@ services:
   api:
     build:
       dockerfile: Dockerfile
-      context: .
+      context: ./api
     command: bash -c "npm run seed && npm run start:dev"
 #    command: npm run start:dev
     environment:
@@ -12,12 +12,26 @@ services:
       PORT: 3000
 #    network_mode: "host"
     volumes:
-      - ./src:/app/src
+      - ./api/src:/app/api/src
     ports:
       - "8000:3000"
     depends_on:
       - postgres
       - minio
+      # - configurator
+
+  # configurator:
+  #   build:
+  #     dockerfile: Dockerfile
+  #     context: ./configurator
+  #   command: npm run start
+  #   environment:
+  #     NODE_ENV: development
+  #     PORT: 3000
+  #   volumes:
+  #     - ./configurator/src:/app/src
+  #   ports:
+  #     - "8000:3000"
 
   postgres:
     image: postgres:15.0
