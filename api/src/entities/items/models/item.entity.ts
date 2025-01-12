@@ -42,7 +42,7 @@ export class Item {
   })
   image: string;
 
-  @ManyToOne(() => User, (user) => user)
-  @JoinColumn({ name: 'id' })
+  @ManyToOne(() => User, (user) => user.id)
+  @JoinColumn({ name: 'user_id' })
   owner: User;
 }

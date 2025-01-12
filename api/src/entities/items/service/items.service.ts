@@ -8,7 +8,10 @@ import { OrderItem } from '@entities/order/models/order-item.entity';
 import { Order } from '@entities/order/models/order.entity';
 import { ItemType } from '@entities/items/models/item-type.entity';
 import { ItemProducer } from '@entities/items/models/item-producer.entity';
-import { isNumeric } from '../../../helpers/helpers';
+import { isNumeric } from '../../../utils/helpers';
+import { PaginationDto } from '@entities/items/dto/pagination.dto';
+import { ItemsFiltersDto } from '@entities/items/dto/filters.dto';
+import { DEFAULT_PAGE_SIZE } from '../../../utils/constants';
 
 @Injectable()
 export class ItemsService {
@@ -25,7 +28,13 @@ export class ItemsService {
     private readonly orderRepository: Repository<Order>,
   ) {}
 
-  async search({ name, types, producers }) {
+  async search({
+    name,
+    types,
+    producers,
+    offset,
+    limit,
+  }: PaginationDto & ItemsFiltersDto) {
     const filters = {};
 
     if (name) {
@@ -54,7 +63,7 @@ export class ItemsService {
       }
     }
 
-    return await this.itemRepository.find({
+    const items = await this.itemRepository.find({
       relations: ['owner', 'item_type', 'item_producer'],
       select: {
         owner: {
@@ -63,7 +72,16 @@ export class ItemsService {
         },
       },
       where: filters,
+      skip: offset,
+      take: limit ?? DEFAULT_PAGE_SIZE,
     });
+
+    const totalCount = await this.itemRepository.count({ where: filters });
+
+    return {
+      items,
+      total_pages: Math.ceil(totalCount / DEFAULT_PAGE_SIZE),
+    };
   }
 
   async findOne(id: number) {

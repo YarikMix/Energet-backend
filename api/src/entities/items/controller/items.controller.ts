@@ -19,6 +19,8 @@ import { NotFoundInterceptor } from '@interceptors/interceptors';
 import { Public } from '@services/auth/decorators/public.decorator';
 import { MinioService } from '@services/minio/minio.service';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { PaginationDto } from '@entities/items/dto/pagination.dto';
+import { ItemsFiltersDto } from '@entities/items/dto/filters.dto';
 
 @Controller('items')
 export class ItemsController {
@@ -41,12 +43,8 @@ export class ItemsController {
 
   @Public()
   @Get('/')
-  searchItems(@Query() params) {
-    return this.itemsService.search({
-      name: params.name,
-      types: params.types,
-      producers: params.producers,
-    });
+  searchItems(@Query() params: PaginationDto & ItemsFiltersDto) {
+    return this.itemsService.search(params);
   }
 
   @Public()
