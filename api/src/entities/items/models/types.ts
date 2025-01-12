@@ -3,9 +3,3 @@ export enum E_ItemStatus {
   Confirmed,
   Deleted,
 }
-
-export enum E_ItemType {
-  Accumulator,
-  SolarBattery,
-  WindTurbine,
-}

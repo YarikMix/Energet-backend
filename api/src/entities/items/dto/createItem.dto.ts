@@ -1,5 +1,4 @@
 import { Column } from 'typeorm';
-import { E_ItemType } from '@entities/items/models/types';
 
 export class CreateItemDto {
   @Column({ name: 'email', type: 'varchar' })
@@ -8,6 +7,6 @@ export class CreateItemDto {
   @Column({ name: 'password', type: 'int' })
   price: number;
 
-  @Column({ name: 'type', type: 'enum', enum: E_ItemType })
-  type: E_ItemType;
+  @Column({ name: 'type', type: 'int' })
+  type: number;
 }

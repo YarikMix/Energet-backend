@@ -25,10 +25,16 @@ export class OrderService {
     const items = await this.orderItemRepository.find({
       where: { orderId: id },
     });
+
     const order = await this.orderRepository.findOne({
-      relations: ['owner'],
-      loadRelationIds: true,
       where: { id },
+      relations: ['owner'],
+      select: {
+        owner: {
+          id: true,
+          name: true,
+        },
+      },
     });
 
     return { ...order, items };

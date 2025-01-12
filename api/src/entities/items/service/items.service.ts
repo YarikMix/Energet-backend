@@ -6,12 +6,18 @@ import { ILike, Repository } from 'typeorm';
 import { Item } from '@entities/items/models/item.entity';
 import { OrderItem } from '@entities/order/models/order-item.entity';
 import { Order } from '@entities/order/models/order.entity';
+import { ItemType } from '@entities/items/models/item-type.entity';
+import { ItemProducer } from '@entities/items/models/item-producer.entity';
 
 @Injectable()
 export class ItemsService {
   constructor(
     @InjectRepository(Item)
     private readonly itemRepository: Repository<Item>,
+    @InjectRepository(ItemType)
+    private readonly itemTypeRepository: Repository<ItemType>,
+    @InjectRepository(ItemProducer)
+    private readonly itemProducerRepository: Repository<ItemProducer>,
     @InjectRepository(OrderItem)
     private readonly orderItemRepository: Repository<OrderItem>,
     @InjectRepository(Order)
@@ -20,20 +26,38 @@ export class ItemsService {
 
   async search({ name }) {
     return await this.itemRepository.find({
-      relations: ['owner'],
-      loadRelationIds: true,
+      relations: ['owner', 'item_type', 'item_producer'],
+      select: {
+        owner: {
+          id: true,
+          name: true,
+        },
+      },
       where: {
-        name: ILike(`%${name}%`),
+        name: ILike(`%${name ? name : ''}%`),
       },
     });
   }
 
   async findOne(id: number) {
-    return await this.itemRepository.find({
+    return await this.itemRepository.findOne({
       where: { id },
+      select: {
+        owner: {
+          id: true,
+          name: true,
+        },
+      },
       relations: ['owner'],
-      loadRelationIds: true,
     });
+  }
+
+  async findTypes() {
+    return await this.itemTypeRepository.find();
+  }
+
+  async findProducers() {
+    return await this.itemProducerRepository.find();
   }
 
   async remove(id: number) {

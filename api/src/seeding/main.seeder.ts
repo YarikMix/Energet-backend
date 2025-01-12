@@ -8,6 +8,8 @@ import { faker } from '@faker-js/faker';
 import { E_OrderStatus } from '@entities/order/models/types';
 import { E_UserType } from '@entities/user/models/types';
 import { MinioService } from '@services/minio/minio.service';
+import { ItemType } from '@entities/items/models/item-type.entity';
+import { ItemProducer } from '@entities/items/models/item-producer.entity';
 
 export class MainSeeder implements Seeder {
   public async run(
@@ -55,6 +57,24 @@ export class MainSeeder implements Seeder {
     console.log('seeding items');
     const itemFactory = factoryManager.get(Item);
     const itemsRepo = dataSource.getRepository(Item);
+    const itemsTypeRepo = dataSource.getRepository(ItemType);
+    const itemsProducerRepo = dataSource.getRepository(ItemProducer);
+
+    let itemsTypes = ['Аккамулятор', 'Солнечная панель', 'Турбина'].map(
+      (name) => {
+        const itemType = new ItemType();
+        itemType.name = name;
+        return itemType;
+      },
+    );
+    itemsTypes = await itemsTypeRepo.save(itemsTypes);
+
+    let itemProducers = ['asdf', 'sdfasdf', 'asd234r'].map((name) => {
+      const itemProducer = new ItemProducer();
+      itemProducer.name = name;
+      return itemProducer;
+    });
+    itemProducers = await itemsProducerRepo.save(itemProducers);
 
     const images = ['1.jpg', '2.jpg', '3.jpg', '4.jpg'];
 
@@ -67,6 +87,8 @@ export class MainSeeder implements Seeder {
               'http://localhost:9000/images/items/' +
               faker.helpers.arrayElement(images),
             owner: faker.helpers.arrayElement(producers),
+            item_type: faker.helpers.arrayElement(itemsTypes),
+            item_producer: faker.helpers.arrayElement(itemProducers),
           });
         }),
     );

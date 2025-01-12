@@ -28,11 +28,24 @@ export class ItemsController {
   ) {}
 
   @Public()
+  @Get('/types')
+  getTypes() {
+    return this.itemsService.findTypes();
+  }
+
+  @Public()
+  @Get('/producers')
+  getProducers() {
+    return this.itemsService.findProducers();
+  }
+
+  @Public()
   @Get('/')
   searchItems(@Query() params) {
     return this.itemsService.search({ name: params.name });
   }
 
+  @Public()
   @Get('/:id')
   @UseInterceptors(NotFoundInterceptor)
   getItem(@Param('id', ParseIntPipe) id: number) {

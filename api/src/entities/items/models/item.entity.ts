@@ -1,6 +1,14 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { E_ItemStatus, E_ItemType } from '@entities/items/models/types';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { E_ItemStatus } from '@entities/items/models/types';
 import { User } from '@entities/user/models/user.entity';
+import { ItemType } from '@entities/items/models/item-type.entity';
+import { ItemProducer } from '@entities/items/models/item-producer.entity';
 
 @Entity('items')
 export class Item {
@@ -10,8 +18,11 @@ export class Item {
   @Column({ name: 'name', type: 'varchar' })
   name: string;
 
-  @Column({ name: 'type', type: 'enum', enum: E_ItemType, nullable: true })
-  type: E_ItemType;
+  @ManyToOne(() => ItemType, (itemType) => itemType.id)
+  item_type: ItemType;
+
+  @ManyToOne(() => ItemProducer, (itemProducer) => itemProducer.id)
+  item_producer: ItemProducer;
 
   @Column({ name: 'password', type: 'int' })
   price: number;
@@ -32,5 +43,6 @@ export class Item {
   image: string;
 
   @ManyToOne(() => User, (user) => user)
+  @JoinColumn({ name: 'id' })
   owner: User;
 }
