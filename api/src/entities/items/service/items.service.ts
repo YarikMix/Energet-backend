@@ -2,12 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { CreateItemDto } from '../dto/createItem.dto';
 import { UpdateItemDto } from '../dto/updateItem.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ILike, Repository } from 'typeorm';
+import { ILike, In, Repository } from 'typeorm';
 import { Item } from '@entities/items/models/item.entity';
 import { OrderItem } from '@entities/order/models/order-item.entity';
 import { Order } from '@entities/order/models/order.entity';
 import { ItemType } from '@entities/items/models/item-type.entity';
 import { ItemProducer } from '@entities/items/models/item-producer.entity';
+import { isNumeric } from '../../../helpers/helpers';
 
 @Injectable()
 export class ItemsService {
@@ -24,7 +25,35 @@ export class ItemsService {
     private readonly orderRepository: Repository<Order>,
   ) {}
 
-  async search({ name }) {
+  async search({ name, types, producers }) {
+    const filters = {};
+
+    if (name) {
+      filters['name'] = ILike(`%${name}%`);
+    }
+
+    if (types) {
+      if (isNumeric(types)) {
+        filters['item_type'] = {
+          id: parseInt(types),
+        };
+      } else if (types.split(',').length > 1) {
+        filters['item_type'] = In(types.split(',').map((i) => parseInt(i)));
+      }
+    }
+
+    if (producers) {
+      if (isNumeric(producers)) {
+        filters['item_producer'] = {
+          id: parseInt(producers),
+        };
+      } else if (producers.split(',').length > 1) {
+        filters['item_producer'] = In(
+          producers.split(',').map((i) => parseInt(i)),
+        );
+      }
+    }
+
     return await this.itemRepository.find({
       relations: ['owner', 'item_type', 'item_producer'],
       select: {
@@ -33,9 +62,7 @@ export class ItemsService {
           name: true,
         },
       },
-      where: {
-        name: ILike(`%${name ? name : ''}%`),
-      },
+      where: filters,
     });
   }
 

@@ -42,7 +42,11 @@ export class ItemsController {
   @Public()
   @Get('/')
   searchItems(@Query() params) {
-    return this.itemsService.search({ name: params.name });
+    return this.itemsService.search({
+      name: params.name,
+      types: params.types,
+      producers: params.producers,
+    });
   }
 
   @Public()
