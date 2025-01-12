@@ -67,16 +67,19 @@ export class MainSeeder implements Seeder {
     const itemsTypeRepo = dataSource.getRepository(ItemType);
     const itemsProducerRepo = dataSource.getRepository(ItemProducer);
 
-    let itemsTypes = ['Аккамулятор', 'Солнечная панель', 'Турбина'].map(
-      (name) => {
-        const itemType = new ItemType();
-        itemType.name = name;
-        return itemType;
-      },
-    );
+    let itemsTypes = [
+      'Солнечная панель',
+      'Инвертор',
+      'Ветрогенератор',
+      'Аккумуляторная батарея',
+    ].map((name) => {
+      const itemType = new ItemType();
+      itemType.name = name;
+      return itemType;
+    });
     itemsTypes = await itemsTypeRepo.save(itemsTypes);
 
-    let itemProducers = ['asdf', 'sdfasdf', 'asd234r'].map((name) => {
+    let itemProducers = ['Sila', 'ROSVETRO'].map((name) => {
       const itemProducer = new ItemProducer();
       itemProducer.name = name;
       return itemProducer;
