@@ -23,7 +23,10 @@ export class MainSeeder implements Seeder {
     dataSource: DataSource,
     factoryManager: SeederFactoryManager,
   ): Promise<any> {
-    const { users, producers } = await this.generateUsers(factoryManager);
+    const { users, producers } = await this.generateUsers(
+      factoryManager,
+      dataSource,
+    );
 
     const items = await this.generateItems(
       factoryManager,
@@ -35,10 +38,17 @@ export class MainSeeder implements Seeder {
   }
 
   generateUsers = async (
-    factoryManager,
+    factoryManager: SeederFactoryManager,
+    dataSource: DataSource,
   ): Promise<{ users: User[]; producers: User[] }> => {
     console.log('seeding users');
     const userFactory = factoryManager.get(User);
+    const usersRepo = dataSource.getRepository(User);
+
+    const testUser = await userFactory.make({
+      email: 'user@user.com',
+    });
+    await usersRepo.save(testUser);
 
     // Создаем покупателей
     const users = await userFactory.saveMany(USERS_COUNT);
