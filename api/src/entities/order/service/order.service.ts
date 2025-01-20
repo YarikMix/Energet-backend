@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { Order } from '@entities/order/models/order.entity';
 import { UpdateOrderDto } from '@entities/order/dto/updateOrder.dto';
 import { OrderItem } from '@entities/order/models/order-item.entity';
+import { User } from '@entities/user/models/user.entity';
+import { E_OrderStatus } from '@entities/order/models/types';
 
 @Injectable()
 export class OrderService {
@@ -14,10 +16,11 @@ export class OrderService {
     private readonly orderItemRepository: Repository<OrderItem>,
   ) {}
 
-  public async getOrders() {
+  public async getOrders(user: User) {
     return await this.orderRepository.find({
       relations: ['owner'],
       loadRelationIds: true,
+      where: { owner: { id: user.id } },
     });
   }
 
@@ -35,6 +38,20 @@ export class OrderService {
           name: true,
         },
       },
+    });
+
+    return { ...order, items };
+  }
+
+  public async getDraftOrder(user: User) {
+    const order = await this.orderRepository.findOne({
+      relations: ['owner'],
+      loadRelationIds: true,
+      where: { status: E_OrderStatus.Draft, owner: { id: user.id } },
+    });
+
+    const items = await this.orderItemRepository.find({
+      where: { orderId: order.id },
     });
 
     return { ...order, items };

@@ -14,21 +14,25 @@ import { OrderService } from '@entities/order/service/order.service';
 import { UpdateOrderDto } from '@entities/order/dto/updateOrder.dto';
 import { NotFoundInterceptor } from '@interceptors/interceptors';
 import { Public } from '@services/auth/decorators/public.decorator';
+import { User } from '@services/auth/decorators/user.decorator';
 
 @Controller('orders')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
-  @Public()
-  @Get('/')
-  getAllOrders() {
-    return this.orderService.getOrders();
+  @Get('/draft')
+  getDraftOrder(@Req() req: Request, @User() user) {
+    return this.orderService.getDraftOrder(user);
   }
 
-  @Public()
+  @Get('/')
+  getAllOrders(@User() user) {
+    return this.orderService.getOrders(user);
+  }
+
   @Get('/:id')
   @UseInterceptors(NotFoundInterceptor)
-  getOrder(@Req() req: Request, @Param('id', ParseIntPipe) id: number) {
+  getOrder(@Param('id', ParseIntPipe) id: number) {
     return this.orderService.getOrder(id);
   }
 

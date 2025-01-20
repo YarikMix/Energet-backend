@@ -63,7 +63,7 @@ export class MainSeeder implements Seeder {
       role: E_UserType.Moderator,
     });
 
-    return { users, producers };
+    return { users: [testUser, ...users], producers };
   };
 
   generateItems = async (
@@ -144,7 +144,7 @@ export class MainSeeder implements Seeder {
     await Promise.all(
       users.map(async (user) => {
         // Создаем черновые заказы покупателю
-        await orderFactory.save({
+        const draftOrder = await orderFactory.save({
           owner: user,
           status: E_OrderStatus.Draft,
         });
@@ -164,7 +164,7 @@ export class MainSeeder implements Seeder {
         // Наполняем заказы оборудованием
         const orderItemFactory = factoryManager.get(OrderItem);
         await Promise.all(
-          orders.map(async (order) => {
+          [draftOrder, ...orders].map(async (order) => {
             const orderItems = faker.helpers.arrayElements(
               items,
               ITEMS_IN_ORDER_COUNT,
