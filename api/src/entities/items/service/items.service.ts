@@ -93,7 +93,7 @@ export class ItemsService {
           name: true,
         },
       },
-      relations: ['owner'],
+      relations: ['owner', 'item_type', 'item_producer'],
     });
   }
 

@@ -24,8 +24,11 @@ export class Item {
   @ManyToOne(() => ItemProducer, (itemProducer) => itemProducer.id)
   item_producer: ItemProducer;
 
-  @Column({ name: 'password', type: 'int' })
+  @Column({ name: 'price', type: 'int' })
   price: number;
+
+  @Column({ name: 'float', type: 'float' })
+  weight: number;
 
   @Column({
     name: 'status',

@@ -78,10 +78,10 @@ export class MainSeeder implements Seeder {
     const itemsProducerRepo = dataSource.getRepository(ItemProducer);
 
     let itemsTypes = [
-      'Солнечная панель',
       'Инвертор',
+      'Аккумулятор',
+      'Солнечная панель',
       'Ветрогенератор',
-      'Аккумуляторная батарея',
     ].map((name) => {
       const itemType = new ItemType();
       itemType.name = name;
@@ -89,7 +89,13 @@ export class MainSeeder implements Seeder {
     });
     itemsTypes = await itemsTypeRepo.save(itemsTypes);
 
-    let itemProducers = ['Sila', 'ROSVETRO'].map((name) => {
+    let itemProducers = [
+      'Hevel',
+      'ROSVETRO',
+      'Sila',
+      'SilaSolar',
+      'SunStonePower',
+    ].map((name) => {
       const itemProducer = new ItemProducer();
       itemProducer.name = name;
       return itemProducer;
@@ -118,7 +124,7 @@ export class MainSeeder implements Seeder {
     await Promise.all(
       images.map(
         async (image) =>
-          await minio.uploadLocalFile('items', image, 'src/assets/1.jpg'),
+          await minio.uploadLocalFile('items', image, 'src/assets/' + image),
       ),
     );
 

@@ -4,8 +4,11 @@ export class CreateItemDto {
   @Column({ name: 'email', type: 'varchar' })
   name: string;
 
-  @Column({ name: 'password', type: 'int' })
+  @Column({ name: 'price', type: 'int' })
   price: number;
+
+  @Column({ name: 'weight', type: 'float' })
+  weight: number;
 
   @Column({ name: 'type', type: 'int' })
   type: number;
