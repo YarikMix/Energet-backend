@@ -60,4 +60,10 @@ export class AuthService {
       token: token,
     };
   }
+
+  async getUserInfo(email: string): Promise<User> {
+    const userInfo = await this.usersService.findOneByEmail(email);
+    delete userInfo.password;
+    return userInfo;
+  }
 }

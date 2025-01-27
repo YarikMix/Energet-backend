@@ -13,7 +13,6 @@ import { Request } from 'express';
 import { OrderService } from '@entities/order/service/order.service';
 import { UpdateOrderDto } from '@entities/order/dto/updateOrder.dto';
 import { NotFoundInterceptor } from '@interceptors/interceptors';
-import { Public } from '@services/auth/decorators/public.decorator';
 import { User } from '@services/auth/decorators/user.decorator';
 
 @Controller('orders')
