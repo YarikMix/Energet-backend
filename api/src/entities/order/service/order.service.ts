@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOneOptions, Repository } from 'typeorm';
 import { Order } from '@entities/order/models/order.entity';
 import { UpdateOrderDto } from '@entities/order/dto/updateOrder.dto';
 import { OrderItem } from '@entities/order/models/order-item.entity';
@@ -19,9 +19,14 @@ export class OrderService {
   public async getOrders(user: User) {
     return await this.orderRepository.find({
       relations: ['owner'],
-      loadRelationIds: true,
       where: { owner: { id: user.id } },
-    });
+      select: {
+        owner: {
+          id: true,
+          name: true,
+        },
+      },
+    } as FindOneOptions<Order>);
   }
 
   async getOrder(id: number) {
@@ -38,7 +43,7 @@ export class OrderService {
           name: true,
         },
       },
-    });
+    } as FindOneOptions<Order>);
 
     return { ...order, items };
   }
@@ -46,13 +51,24 @@ export class OrderService {
   public async getDraftOrder(user: User) {
     const order = await this.orderRepository.findOne({
       relations: ['owner'],
-      loadRelationIds: true,
       where: { status: E_OrderStatus.Draft, owner: { id: user.id } },
-    });
+      select: {
+        owner: {
+          id: true,
+          name: true,
+        },
+      },
+    } as FindOneOptions<Order>);
 
-    const items = await this.orderItemRepository.find({
+    const rawItems = await this.orderItemRepository.find({
+      relations: ['item'],
       where: { orderId: order.id },
     });
+
+    const items = rawItems.map((rawItem) => ({
+      count: rawItem.count,
+      ...rawItem.item,
+    }));
 
     return { ...order, items };
   }
