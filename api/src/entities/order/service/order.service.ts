@@ -6,6 +6,7 @@ import { UpdateOrderDto } from '@entities/order/dto/updateOrder.dto';
 import { OrderItem } from '@entities/order/models/order-item.entity';
 import { User } from '@entities/user/models/user.entity';
 import { E_OrderStatus } from '@entities/order/models/types';
+import { UpdateOrderItemCountDto } from '@entities/order/dto/updateOrderItemCount.dto';
 
 @Injectable()
 export class OrderService {
@@ -81,5 +82,16 @@ export class OrderService {
 
   public async updateOrder(id: number, updateOrderDto: UpdateOrderDto) {
     return await this.orderRepository.update({ id }, updateOrderDto);
+  }
+
+  public async updateItemCount(
+    order_id: number,
+    item_id: number,
+    dto: UpdateOrderItemCountDto,
+  ) {
+    return await this.orderItemRepository.update(
+      { orderId: order_id, itemId: item_id },
+      dto,
+    );
   }
 }
