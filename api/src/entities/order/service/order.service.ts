@@ -31,9 +31,15 @@ export class OrderService {
   }
 
   async getOrder(id: number) {
-    const items = await this.orderItemRepository.find({
+    const rawItems = await this.orderItemRepository.find({
+      relations: ['item'],
       where: { orderId: id },
     });
+
+    const items = rawItems.map((rawItem) => ({
+      count: rawItem.count,
+      ...rawItem.item,
+    }));
 
     const order = await this.orderRepository.findOne({
       where: { id },
@@ -93,5 +99,21 @@ export class OrderService {
       { orderId: order_id, itemId: item_id },
       dto,
     );
+  }
+
+  public async removeItemFromOrder(order_id: number, item_id: number) {
+    return await this.orderItemRepository.delete({
+      orderId: order_id,
+      itemId: item_id,
+    });
+  }
+
+  public async addItemToOrder(order_id: number, item_id: number) {
+    const item = this.orderItemRepository.create({
+      orderId: order_id,
+      itemId: item_id,
+    });
+
+    return await this.orderItemRepository.save(item);
   }
 }

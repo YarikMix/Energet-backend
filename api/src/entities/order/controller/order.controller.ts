@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpStatus,
   Param,
@@ -52,14 +53,31 @@ export class OrderController {
     return this.orderService.updateOrder(id, body);
   }
 
-  @Public()
   @Put('/:id/update_item/:item_id')
-  async updateItemCount(
+  async updateItemCountInOrder(
     @Body() body: UpdateOrderItemCountDto,
     @Param('id', ParseIntPipe) order_id: number,
     @Param('item_id', ParseIntPipe) item_id: number,
   ) {
     await this.orderService.updateItemCount(order_id, item_id, body);
+    return this.orderService.getOrder(order_id);
+  }
+
+  @Delete('/:id/delete_item/:item_id')
+  async deleteItemInOrder(
+    @Param('id', ParseIntPipe) order_id: number,
+    @Param('item_id', ParseIntPipe) item_id: number,
+  ) {
+    await this.orderService.removeItemFromOrder(order_id, item_id);
+    return this.orderService.getOrder(order_id);
+  }
+
+  @Post('/:id/add_item/:item_id')
+  async addItemInOrder(
+    @Param('id', ParseIntPipe) order_id: number,
+    @Param('item_id', ParseIntPipe) item_id: number,
+  ) {
+    await this.orderService.addItemToOrder(order_id, item_id);
     return this.orderService.getOrder(order_id);
   }
 }
