@@ -25,4 +25,6 @@ export class Order {
   @ManyToOne(() => User, (user) => user)
   // @JoinColumn()
   owner: User;
+
+  // TODO: @BeforeInsert() для created_date
 }

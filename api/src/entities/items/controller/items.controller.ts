@@ -11,6 +11,9 @@ import {
   BadRequestException,
   Put,
   Query,
+  Res,
+  HttpStatus,
+  Req,
 } from '@nestjs/common';
 import { ItemsService } from '../service/items.service';
 import { CreateItemDto } from '../dto/createItem.dto';
@@ -21,6 +24,7 @@ import { MinioService } from '@services/minio/minio.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PaginationDto } from '@entities/items/dto/pagination.dto';
 import { ItemsFiltersDto } from '@entities/items/dto/filters.dto';
+import { User } from '@services/auth/decorators/user.decorator';
 
 @Controller('items')
 export class ItemsController {
@@ -43,15 +47,19 @@ export class ItemsController {
 
   @Public()
   @Get('/')
-  searchItems(@Query() params: PaginationDto & ItemsFiltersDto) {
-    return this.itemsService.search(params);
+  searchItems(
+    @Req() req,
+    @Query() params: PaginationDto & ItemsFiltersDto,
+    @User() user,
+  ) {
+    return this.itemsService.search({ ...params, userId: user?.id });
   }
 
   @Public()
   @Get('/:id')
   @UseInterceptors(NotFoundInterceptor)
-  getItem(@Param('id', ParseIntPipe) id: number) {
-    return this.itemsService.findOne(id);
+  getItem(@Param('id', ParseIntPipe) id: number, @User() user) {
+    return this.itemsService.findOne(id, user.id);
   }
 
   @Public()
@@ -97,7 +105,6 @@ export class ItemsController {
 
     return this.itemsService.findOne(id);
   }
-
   @Delete('/:id')
   remove(@Param('id') id: string) {
     return this.itemsService.remove(+id);
@@ -108,7 +115,7 @@ export class ItemsController {
     @Param('item_id', ParseIntPipe) item_id: number,
     @Param('order_id', ParseIntPipe) order_id: number,
   ) {
-    return this.itemsService.addItemTodOrder(item_id, order_id);
+    return this.itemsService.addItemToOrder(item_id, order_id);
   }
 
   @Post('/:item_id/delete_from_order/:order_id')
@@ -117,5 +124,29 @@ export class ItemsController {
     @Param('order_id', ParseIntPipe) order_id: number,
   ) {
     return this.itemsService.deleteItemFromOrder(item_id, order_id);
+  }
+
+  @Post('/:id/add_to_favourites')
+  async addItemToFavourite(
+    @Res({ passthrough: true }) res,
+    @Param('id') id: number,
+    @User() user,
+  ) {
+    const isFavouriteItem = await this.itemsService.isFavouriteItem(
+      id,
+      user.id,
+    );
+
+    if (isFavouriteItem) {
+      res.status(HttpStatus.CONFLICT).send();
+      return;
+    }
+
+    return this.itemsService.addItemToFavourite(id, user.id);
+  }
+
+  @Delete('/:id/delete_from_favourites')
+  removeItemFromFavourite(@Param('id') id: number, @User() user) {
+    return this.itemsService.removeItemFromFavourite(id, user.id);
   }
 }

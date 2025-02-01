@@ -2,7 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { CreateItemDto } from '../dto/createItem.dto';
 import { UpdateItemDto } from '../dto/updateItem.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ILike, In, Repository } from 'typeorm';
+import {
+  FindManyOptions,
+  FindOneOptions,
+  ILike,
+  In,
+  Repository,
+} from 'typeorm';
 import { Item } from '@entities/items/models/item.entity';
 import { OrderItem } from '@entities/order/models/order-item.entity';
 import { Order } from '@entities/order/models/order.entity';
@@ -12,6 +18,7 @@ import { isNumeric } from '../../../utils/helpers';
 import { PaginationDto } from '@entities/items/dto/pagination.dto';
 import { ItemsFiltersDto } from '@entities/items/dto/filters.dto';
 import { DEFAULT_PAGE_SIZE } from '../../../utils/constants';
+import { User } from '@entities/user/models/user.entity';
 
 @Injectable()
 export class ItemsService {
@@ -26,6 +33,8 @@ export class ItemsService {
     private readonly orderItemRepository: Repository<OrderItem>,
     @InjectRepository(Order)
     private readonly orderRepository: Repository<Order>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
   async search({
@@ -34,7 +43,8 @@ export class ItemsService {
     producers,
     offset,
     limit,
-  }: PaginationDto & ItemsFiltersDto) {
+    userId,
+  }: PaginationDto & ItemsFiltersDto & { userId?: number }) {
     const filters = {};
 
     if (name) {
@@ -63,7 +73,7 @@ export class ItemsService {
       }
     }
 
-    const items = await this.itemRepository.find({
+    let items = await this.itemRepository.find({
       relations: ['owner', 'item_type', 'item_producer'],
       select: {
         owner: {
@@ -74,7 +84,28 @@ export class ItemsService {
       where: filters,
       skip: offset,
       take: limit ?? DEFAULT_PAGE_SIZE,
-    });
+    } as FindManyOptions<Item>);
+
+    if (userId) {
+      const user = await this.userRepository.findOne({
+        relations: {
+          items: {
+            item_type: true,
+          },
+        },
+        where: {
+          id: userId,
+        },
+      } as FindOneOptions<User>);
+
+      items = await Promise.all(
+        items.map(async (item) => {
+          const favourite =
+            user.items.find((i) => i.id == item.id) != undefined;
+          return { ...item, favourite };
+        }),
+      );
+    }
 
     const totalCount = await this.itemRepository.count({ where: filters });
 
@@ -84,9 +115,9 @@ export class ItemsService {
     };
   }
 
-  async findOne(id: number) {
-    return await this.itemRepository.findOne({
-      where: { id },
+  async findOne(itemId: number, userId?: number) {
+    const item = await this.itemRepository.findOne({
+      where: { id: itemId },
       select: {
         owner: {
           id: true,
@@ -94,7 +125,27 @@ export class ItemsService {
         },
       },
       relations: ['owner', 'item_type', 'item_producer'],
-    });
+    } as FindOneOptions<Item>);
+
+    if (userId) {
+      const user = await this.userRepository.findOne({
+        relations: {
+          items: {
+            item_type: true,
+          },
+        },
+        where: {
+          id: userId,
+        },
+      } as FindOneOptions<User>);
+
+      return {
+        ...item,
+        favourite: user.items.find((i) => i.id == itemId) != undefined,
+      };
+    }
+
+    return item;
   }
 
   async findTypes() {
@@ -131,7 +182,7 @@ export class ItemsService {
     });
   }
 
-  async addItemTodOrder(itemId: number, orderId: number) {
+  async addItemToOrder(itemId: number, orderId: number) {
     const orderItem = await this.orderItemRepository.create({
       orderId: orderId,
       itemId: itemId,
@@ -201,5 +252,54 @@ export class ItemsService {
     }
 
     return { ...data, items };
+  }
+
+  async isFavouriteItem(itemId: number, ownerId: number) {
+    const user = await this.userRepository.findOne({
+      relations: {
+        items: true,
+      },
+      where: {
+        id: ownerId,
+      },
+    });
+
+    return user.items.find((item) => item.id == itemId) !== undefined;
+  }
+
+  async addItemToFavourite(itemId: number, ownerId: number) {
+    const item = await this.itemRepository.findOne({
+      where: { id: itemId },
+    });
+
+    const user = await this.userRepository.findOne({
+      relations: {
+        items: true,
+      },
+      where: {
+        id: ownerId,
+      },
+    });
+
+    user.items.push(item);
+
+    return await this.userRepository.save(user);
+  }
+
+  async removeItemFromFavourite(itemId: number, ownerId: number) {
+    const user = await this.userRepository.findOne({
+      relations: {
+        items: true,
+      },
+      where: {
+        id: ownerId,
+      },
+    });
+
+    user.items = user.items.filter((item) => {
+      return item.id != itemId;
+    });
+
+    return await this.userRepository.save(user);
   }
 }

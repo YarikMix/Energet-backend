@@ -8,12 +8,22 @@ import { OrderItem } from '@entities/order/models/order-item.entity';
 import { MinioService } from '@services/minio/minio.service';
 import { ItemType } from '@entities/items/models/item-type.entity';
 import { ItemProducer } from '@entities/items/models/item-producer.entity';
+import { UsersService } from '@entities/user/service/user.service';
+import { User } from '@entities/user/models/user.entity';
+import { OrderService } from '@entities/order/service/order.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Item, OrderItem, Order, ItemType, ItemProducer]),
+    TypeOrmModule.forFeature([
+      Item,
+      OrderItem,
+      Order,
+      ItemType,
+      ItemProducer,
+      User,
+    ]),
   ],
   controllers: [ItemsController],
-  providers: [ItemsService, MinioService],
+  providers: [ItemsService, MinioService, UsersService, OrderService],
 })
 export class ItemsModule {}

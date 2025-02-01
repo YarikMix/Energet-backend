@@ -9,6 +9,7 @@ import { JwtGuard } from '@services/auth/guards/jwt.guard';
 import { AuthModule } from '@services/auth/auth.module';
 import { MinioService } from '@services/minio/minio.service';
 import { AppLoggerMiddleware } from './middleware/logger';
+import { FavouriteModule } from '@entities/favourite/favourite.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { AppLoggerMiddleware } from './middleware/logger';
     ItemsModule,
     UsersModule,
     AuthModule,
+    FavouriteModule,
   ],
   providers: [
     {

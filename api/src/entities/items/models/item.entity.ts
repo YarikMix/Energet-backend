@@ -2,7 +2,9 @@ import {
   Column,
   Entity,
   JoinColumn,
+  ManyToMany,
   ManyToOne,
+  PrimaryColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { E_ItemStatus } from '@entities/items/models/types';
@@ -10,9 +12,9 @@ import { User } from '@entities/user/models/user.entity';
 import { ItemType } from '@entities/items/models/item-type.entity';
 import { ItemProducer } from '@entities/items/models/item-producer.entity';
 
-@Entity('items')
+@Entity('item')
 export class Item {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ type: 'int', name: 'id', unsigned: true })
   id: number;
 
   @Column({ name: 'name', type: 'varchar' })

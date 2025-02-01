@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOneOptions, Repository } from 'typeorm';
+import { FindOneOptions, FindOptions, Repository } from 'typeorm';
 import { Order } from '@entities/order/models/order.entity';
 import { UpdateOrderDto } from '@entities/order/dto/updateOrder.dto';
 import { OrderItem } from '@entities/order/models/order-item.entity';
@@ -15,6 +15,8 @@ export class OrderService {
     private readonly orderRepository: Repository<Order>,
     @InjectRepository(OrderItem)
     private readonly orderItemRepository: Repository<OrderItem>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
   public async getOrders(user: User) {
@@ -30,16 +32,11 @@ export class OrderService {
     } as FindOneOptions<Order>);
   }
 
-  async getOrder(id: number) {
+  async getOrder(id: number, userId?: number) {
     const rawItems = await this.orderItemRepository.find({
       relations: ['item'],
       where: { orderId: id },
     });
-
-    const items = rawItems.map((rawItem) => ({
-      count: rawItem.count,
-      ...rawItem.item,
-    }));
 
     const order = await this.orderRepository.findOne({
       where: { id },
@@ -52,13 +49,39 @@ export class OrderService {
       },
     } as FindOneOptions<Order>);
 
+    let items = rawItems.map((rawItem) => ({
+      count: rawItem.count,
+      ...rawItem.item,
+    }));
+
+    if (userId) {
+      const user = await this.userRepository.findOne({
+        relations: {
+          items: {
+            item_type: true,
+            item_producer: true,
+          },
+        },
+        where: {
+          id: userId,
+        },
+      } as FindOneOptions<User>);
+
+      items = items.map((item) => {
+        return {
+          ...item,
+          favourite: user.items.find((i) => i.id == item.id) !== undefined,
+        };
+      });
+    }
+
     return { ...order, items };
   }
 
-  public async getDraftOrder(user: User) {
+  public async getDraftOrder(userId: number) {
     const order = await this.orderRepository.findOne({
       relations: ['owner'],
-      where: { status: E_OrderStatus.Draft, owner: { id: user.id } },
+      where: { status: E_OrderStatus.Draft, owner: { id: userId } },
       select: {
         owner: {
           id: true,
@@ -67,23 +90,51 @@ export class OrderService {
       },
     } as FindOneOptions<Order>);
 
+    if (!order) {
+      return null;
+    }
+
     const rawItems = await this.orderItemRepository.find({
       relations: ['item'],
       where: { orderId: order.id },
     });
 
-    const items = rawItems.map((rawItem) => ({
-      count: rawItem.count,
-      ...rawItem.item,
-    }));
+    const user = await this.userRepository.findOne({
+      relations: {
+        items: true,
+      },
+      where: {
+        id: userId,
+      },
+    } as FindOneOptions<User>);
 
-    return { ...order, items };
+    console.log(user.items);
+
+    const items = await Promise.all(
+      rawItems.map(async (rawItem) => {
+        const favourite =
+          user.items.find((i) => i.id == rawItem.itemId) != undefined;
+
+        return {
+          count: rawItem.count,
+          ...rawItem.item,
+          favourite,
+        };
+      }),
+    );
+
+    return { ...order, items } as Order;
   }
 
-  public async createOrder() {
+  public async createOrder(owner: User) {
     const newOrder = this.orderRepository.create();
+    newOrder.owner = owner;
     newOrder.created_date = new Date();
     return await this.orderRepository.save(newOrder);
+  }
+
+  public async deleteOrder(id: number) {
+    return await this.orderRepository.delete(id);
   }
 
   public async updateOrder(id: number, updateOrderDto: UpdateOrderDto) {
