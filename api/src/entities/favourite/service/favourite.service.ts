@@ -1,22 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Item } from '@entities/items/models/item.entity';
-import { FindOneOptions, ILike, In, Repository } from 'typeorm';
-import { ItemType } from '@entities/items/models/item-type.entity';
+import { FindManyOptions, Repository } from 'typeorm';
 import { PaginationDto } from '@entities/items/dto/pagination.dto';
 import { ItemsFiltersDto } from '@entities/items/dto/filters.dto';
 import { isNumeric } from '../../../utils/helpers';
-import { User } from '@entities/user/models/user.entity';
+import { Favourite } from '@entities/favourite/models/favourite.entity';
 
 @Injectable()
 export class FavouriteService {
   constructor(
     @InjectRepository(Item)
     private readonly itemRepository: Repository<Item>,
-    @InjectRepository(ItemType)
-    private readonly favouriteRepository: Repository<ItemType>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    @InjectRepository(Favourite)
+    private readonly favouriteRepository: Repository<Favourite>,
   ) {}
 
   async search({
@@ -25,51 +22,66 @@ export class FavouriteService {
     producers,
     userId,
   }: PaginationDto & ItemsFiltersDto & { userId: number }) {
-    const filters = {};
+    const favourites = await this.favouriteRepository.find({
+      relations: {
+        item: {
+          owner: true,
+          item_type: true,
+          item_producer: true,
+        },
+      },
+      select: {
+        owner: {
+          id: true,
+          name: true,
+        },
+      },
+      where: { ownerId: userId },
+    } as FindManyOptions<Favourite>);
+
+    let items = favourites.map((favourite) => {
+      return {
+        ...favourite.item,
+        favourite: true,
+      };
+    });
 
     if (name) {
-      filters['name'] = ILike(`%${name}%`);
+      items = items.filter((item) => {
+        return item.name.toLowerCase().includes(name);
+      });
     }
 
     if (types) {
       if (isNumeric(types)) {
-        filters['item_type'] = {
-          id: parseInt(types),
-        };
+        items = items.filter((item) => {
+          return item.item_type.id == parseInt(types);
+        });
       } else if (types.split(',').length > 1) {
-        filters['item_type'] = In(types.split(',').map((i) => parseInt(i)));
+        items = items.filter((item) => {
+          return types
+            .split(',')
+            .map((i) => parseInt(i))
+            .includes(item.item_type.id);
+        });
       }
     }
 
     if (producers) {
       if (isNumeric(producers)) {
-        filters['item_producer'] = {
-          id: parseInt(producers),
-        };
+        items = items.filter((item) => {
+          return item.item_producer.id == parseInt(producers);
+        });
       } else if (producers.split(',').length > 1) {
-        filters['item_producer'] = In(
-          producers.split(',').map((i) => parseInt(i)),
-        );
+        items = items.filter((item) => {
+          return producers
+            .split(',')
+            .map((i) => parseInt(i))
+            .includes(item.item_producer.id);
+        });
       }
     }
 
-    const user = await this.userRepository.findOne({
-      relations: {
-        items: {
-          item_type: true,
-          item_producer: true,
-        },
-      },
-      where: {
-        id: userId,
-      },
-    } as FindOneOptions<User>);
-
-    return user.items.map((item) => {
-      return {
-        ...item,
-        favourite: true,
-      };
-    });
+    return items;
   }
 }

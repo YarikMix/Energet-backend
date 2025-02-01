@@ -1,12 +1,5 @@
-import {
-  Column,
-  Entity,
-  JoinTable,
-  ManyToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { E_UserType } from '@entities/user/models/types';
-import { Item } from '@entities/items/models/item.entity';
 
 @Entity('users')
 export class User {
@@ -32,8 +25,4 @@ export class User {
     nullable: true,
   })
   role: E_UserType | null;
-
-  @ManyToMany(() => Item, { onDelete: 'NO ACTION', onUpdate: 'NO ACTION' })
-  @JoinTable()
-  items?: Item[];
 }

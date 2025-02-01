@@ -64,7 +64,8 @@ export class ItemsController {
 
   @Public()
   @Post('/')
-  @UseInterceptors(FileInterceptor('file'))
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  @UseInterceptors(FileInterceptor('file') as Function)
   async create(
     @Body() createItemDto: CreateItemDto,
     @UploadedFile() file: Express.Multer.File,
@@ -90,7 +91,8 @@ export class ItemsController {
 
   @Public()
   @Put('/:id/update_image/')
-  @UseInterceptors(FileInterceptor('file'))
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  @UseInterceptors(FileInterceptor('file') as Function)
   async updateImage(
     @Param('id', ParseIntPipe) id: number,
     @UploadedFile() file: Express.Multer.File,

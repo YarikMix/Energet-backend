@@ -18,7 +18,7 @@ import { isNumeric } from '../../../utils/helpers';
 import { PaginationDto } from '@entities/items/dto/pagination.dto';
 import { ItemsFiltersDto } from '@entities/items/dto/filters.dto';
 import { DEFAULT_PAGE_SIZE } from '../../../utils/constants';
-import { User } from '@entities/user/models/user.entity';
+import { Favourite } from '@entities/favourite/models/favourite.entity';
 
 @Injectable()
 export class ItemsService {
@@ -33,8 +33,8 @@ export class ItemsService {
     private readonly orderItemRepository: Repository<OrderItem>,
     @InjectRepository(Order)
     private readonly orderRepository: Repository<Order>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    @InjectRepository(Favourite)
+    private readonly favouriteRepository: Repository<Favourite>,
   ) {}
 
   async search({
@@ -87,21 +87,14 @@ export class ItemsService {
     } as FindManyOptions<Item>);
 
     if (userId) {
-      const user = await this.userRepository.findOne({
-        relations: {
-          items: {
-            item_type: true,
-          },
-        },
-        where: {
-          id: userId,
-        },
-      } as FindOneOptions<User>);
-
       items = await Promise.all(
         items.map(async (item) => {
-          const favourite =
-            user.items.find((i) => i.id == item.id) != undefined;
+          const favourite = await this.favouriteRepository.exists({
+            where: {
+              itemId: item.id,
+              ownerId: userId,
+            },
+          });
           return { ...item, favourite };
         }),
       );
@@ -128,21 +121,13 @@ export class ItemsService {
     } as FindOneOptions<Item>);
 
     if (userId) {
-      const user = await this.userRepository.findOne({
-        relations: {
-          items: {
-            item_type: true,
-          },
-        },
+      const favourite = await this.favouriteRepository.exists({
         where: {
-          id: userId,
+          itemId: item.id,
+          ownerId: userId,
         },
-      } as FindOneOptions<User>);
-
-      return {
-        ...item,
-        favourite: user.items.find((i) => i.id == itemId) != undefined,
-      };
+      });
+      return { ...item, favourite };
     }
 
     return item;
@@ -255,51 +240,29 @@ export class ItemsService {
   }
 
   async isFavouriteItem(itemId: number, ownerId: number) {
-    const user = await this.userRepository.findOne({
-      relations: {
-        items: true,
-      },
+    return await this.favouriteRepository.exists({
       where: {
-        id: ownerId,
+        itemId,
+        ownerId,
       },
     });
-
-    return user.items.find((item) => item.id == itemId) !== undefined;
   }
 
   async addItemToFavourite(itemId: number, ownerId: number) {
-    const item = await this.itemRepository.findOne({
-      where: { id: itemId },
+    const favourite = this.favouriteRepository.create({
+      itemId,
+      ownerId,
     });
 
-    const user = await this.userRepository.findOne({
-      relations: {
-        items: true,
-      },
-      where: {
-        id: ownerId,
-      },
-    });
-
-    user.items.push(item);
-
-    return await this.userRepository.save(user);
+    return await this.favouriteRepository.save(favourite);
   }
 
   async removeItemFromFavourite(itemId: number, ownerId: number) {
-    const user = await this.userRepository.findOne({
-      relations: {
-        items: true,
-      },
-      where: {
-        id: ownerId,
-      },
+    const favourite = this.favouriteRepository.create({
+      itemId,
+      ownerId,
     });
 
-    user.items = user.items.filter((item) => {
-      return item.id != itemId;
-    });
-
-    return await this.userRepository.save(user);
+    return await this.favouriteRepository.delete(favourite);
   }
 }

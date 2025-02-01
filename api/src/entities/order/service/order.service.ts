@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOneOptions, FindOptions, Repository } from 'typeorm';
+import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { Order } from '@entities/order/models/order.entity';
 import { UpdateOrderDto } from '@entities/order/dto/updateOrder.dto';
 import { OrderItem } from '@entities/order/models/order-item.entity';
 import { User } from '@entities/user/models/user.entity';
 import { E_OrderStatus } from '@entities/order/models/types';
 import { UpdateOrderItemCountDto } from '@entities/order/dto/updateOrderItemCount.dto';
+import { Favourite } from '@entities/favourite/models/favourite.entity';
 
 @Injectable()
 export class OrderService {
@@ -17,6 +18,8 @@ export class OrderService {
     private readonly orderItemRepository: Repository<OrderItem>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Favourite)
+    private readonly favouriteRepository: Repository<Favourite>,
   ) {}
 
   public async getOrders(user: User) {
@@ -55,24 +58,21 @@ export class OrderService {
     }));
 
     if (userId) {
-      const user = await this.userRepository.findOne({
-        relations: {
-          items: {
-            item_type: true,
-            item_producer: true,
-          },
-        },
-        where: {
-          id: userId,
-        },
-      } as FindOneOptions<User>);
+      items = await Promise.all(
+        items.map(async (item) => {
+          const favourite = await this.favouriteRepository.exists({
+            where: {
+              itemId: item.id,
+              ownerId: userId,
+            },
+          });
 
-      items = items.map((item) => {
-        return {
-          ...item,
-          favourite: user.items.find((i) => i.id == item.id) !== undefined,
-        };
-      });
+          return {
+            ...item,
+            favourite,
+          };
+        }),
+      );
     }
 
     return { ...order, items };
@@ -95,25 +95,20 @@ export class OrderService {
     }
 
     const rawItems = await this.orderItemRepository.find({
-      relations: ['item'],
-      where: { orderId: order.id },
-    });
-
-    const user = await this.userRepository.findOne({
       relations: {
-        items: true,
+        item: true,
       },
-      where: {
-        id: userId,
-      },
-    } as FindOneOptions<User>);
-
-    console.log(user.items);
+      where: { orderId: order.id },
+    } as FindManyOptions<OrderItem>);
 
     const items = await Promise.all(
       rawItems.map(async (rawItem) => {
-        const favourite =
-          user.items.find((i) => i.id == rawItem.itemId) != undefined;
+        const favourite = await this.favouriteRepository.exists({
+          where: {
+            itemId: rawItem.item.id,
+            ownerId: userId,
+          },
+        });
 
         return {
           count: rawItem.count,

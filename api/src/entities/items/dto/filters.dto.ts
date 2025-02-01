@@ -1,19 +1,15 @@
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class ItemsFiltersDto {
   @IsString()
   @IsOptional()
-  name: number;
+  name?: string;
 
   @IsString()
   @IsOptional()
-  types: string;
+  types?: string;
 
   @IsString()
   @IsOptional()
-  producers: string;
-
-  @IsBoolean()
-  @IsOptional()
-  favourites: boolean;
+  producers?: string;
 }

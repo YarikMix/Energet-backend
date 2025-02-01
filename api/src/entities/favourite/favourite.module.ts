@@ -6,22 +6,12 @@ import { FavouriteController } from '@entities/favourite/controller/favourite.co
 import { Item } from '@entities/items/models/item.entity';
 import { ItemType } from '@entities/items/models/item-type.entity';
 import { ItemProducer } from '@entities/items/models/item-producer.entity';
-import { User } from '@entities/user/models/user.entity';
-import { UsersService } from '@entities/user/service/user.service';
-import { OrderItem } from '@entities/order/models/order-item.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      Favourite,
-      Item,
-      ItemType,
-      ItemProducer,
-      User,
-      OrderItem,
-    ]),
+    TypeOrmModule.forFeature([Favourite, Item, ItemType, ItemProducer]),
   ],
   controllers: [FavouriteController],
-  providers: [FavouriteService, UsersService],
+  providers: [FavouriteService],
 })
 export class FavouriteModule {}
