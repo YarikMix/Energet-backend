@@ -57,9 +57,9 @@ export class ItemsController {
 
   @Public()
   @Get('/:id')
-  @UseInterceptors(NotFoundInterceptor)
+  // @UseInterceptors(NotFoundInterceptor)
   getItem(@Param('id', ParseIntPipe) id: number, @User() user) {
-    return this.itemsService.findOne(id, user.id);
+    return this.itemsService.findOne(id, user?.id);
   }
 
   @Public()

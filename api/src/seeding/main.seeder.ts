@@ -10,6 +10,7 @@ import { E_UserType } from '@entities/user/models/types';
 import { MinioService } from '@services/minio/minio.service';
 import { ItemType } from '@entities/items/models/item-type.entity';
 import { ItemProducer } from '@entities/items/models/item-producer.entity';
+import { Favourite } from '@entities/favourite/models/favourite.entity';
 
 const ITEMS_COUNT = 51;
 const ITEMS_IN_ORDER_COUNT = 3;
@@ -17,6 +18,7 @@ const USERS_COUNT = 10;
 const MODERATORS_COUNT = 3;
 const PRODUCERS_COUNT = 5;
 const USER_ORDERS_COUNT = 3;
+const FAVOURITES_FOR_USER_COUNT = 5;
 
 export class MainSeeder implements Seeder {
   public async run(
@@ -34,8 +36,42 @@ export class MainSeeder implements Seeder {
       producers,
     );
 
+    await this.generateFavourites(factoryManager, dataSource, users, items);
+
     await this.generateOrders(factoryManager, dataSource, users, items);
   }
+
+  generateFavourites = async (
+    factoryManager: SeederFactoryManager,
+    dataSource: DataSource,
+    users: User[],
+    items: Item[],
+  ) => {
+    console.log('seeding favourites');
+
+    const favouritesRepo = dataSource.getRepository(Favourite);
+    const favouriteFactory = factoryManager.get(Favourite);
+
+    await Promise.all(
+      users.map(async (user) => {
+        const randomItems = faker.helpers.arrayElements(
+          items,
+          FAVOURITES_FOR_USER_COUNT,
+        );
+
+        const favourites = await Promise.all(
+          randomItems.map(async (item) => {
+            return await favouriteFactory.make({
+              itemId: item.id,
+              ownerId: user.id,
+            });
+          }),
+        );
+
+        await favouritesRepo.save(favourites);
+      }),
+    );
+  };
 
   generateUsers = async (
     factoryManager: SeederFactoryManager,

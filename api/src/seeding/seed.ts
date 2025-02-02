@@ -7,10 +7,17 @@ import { UserFactory } from './user.factory';
 import { OrderFactory } from './order.factory';
 import { ItemFactory } from './item.factory';
 import { OrderItemFactory } from './orderItem.factory';
+import { FavouriteFactory } from './favourite.factory';
 
 const options: DataSourceOptions & SeederOptions = {
   ...pgConfig(),
-  factories: [UserFactory, OrderFactory, ItemFactory, OrderItemFactory],
+  factories: [
+    UserFactory,
+    OrderFactory,
+    ItemFactory,
+    OrderItemFactory,
+    FavouriteFactory,
+  ],
   seeds: [MainSeeder],
 };
 

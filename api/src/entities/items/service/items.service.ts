@@ -258,11 +258,6 @@ export class ItemsService {
   }
 
   async removeItemFromFavourite(itemId: number, ownerId: number) {
-    const favourite = this.favouriteRepository.create({
-      itemId,
-      ownerId,
-    });
-
-    return await this.favouriteRepository.delete(favourite);
+    return await this.favouriteRepository.delete({ ownerId, itemId });
   }
 }

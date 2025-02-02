@@ -1,4 +1,5 @@
 import {
+  BeforeInsert,
   Column,
   Entity,
   JoinColumn,
@@ -34,5 +35,8 @@ export class Favourite {
   })
   created_date: Date;
 
-  // TODO: @BeforeInsert() для created_date
+  @BeforeInsert()
+  updateDates() {
+    this.created_date = new Date();
+  }
 }

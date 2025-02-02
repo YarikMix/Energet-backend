@@ -99,6 +99,9 @@ export class OrderService {
         item: true,
       },
       where: { orderId: order.id },
+      order: {
+        created_date: 'ASC',
+      },
     } as FindManyOptions<OrderItem>);
 
     const items = await Promise.all(
@@ -124,7 +127,6 @@ export class OrderService {
   public async createOrder(owner: User) {
     const newOrder = this.orderRepository.create();
     newOrder.owner = owner;
-    newOrder.created_date = new Date();
     return await this.orderRepository.save(newOrder);
   }
 

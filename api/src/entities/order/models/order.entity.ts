@@ -1,4 +1,10 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BeforeInsert,
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { E_OrderStatus } from '@entities/order/models/types';
 import { User } from '@entities/user/models/user.entity';
 
@@ -26,5 +32,9 @@ export class Order {
   // @JoinColumn()
   owner: User;
 
-  // TODO: @BeforeInsert() для created_date
+  // TODO
+  // @BeforeInsert()
+  // updateDates() {
+  //   this.created_date = new Date();
+  // }
 }

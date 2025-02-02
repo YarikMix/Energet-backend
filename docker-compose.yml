@@ -16,6 +16,11 @@ services:
     ports:
       - "8000:3000"
     depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    links:
       - postgres
       - minio
       # - configurator
@@ -36,25 +41,30 @@ services:
   postgres:
     image: postgres:15.0
     environment:
-      POSTGRES_USER: nest_test
-      POSTGRES_PASSWORD: nest_test
-      POSTGRES_DB: nest_test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
       PGDATA: /data/postgres
     volumes:
-       - postgres:/var/www/nest_test/docker-volumes/postgres
+       - postgres:/var/www/postgres/docker-volumes/postgres
     ports:
       - "5432:5432"
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   pgadmin:
     image: dpage/pgadmin4
     environment:
-      PGADMIN_DEFAULT_EMAIL: nest_test@admin.com
-      PGADMIN_DEFAULT_PASSWORD: nest_test
+      PGADMIN_DEFAULT_EMAIL: postgres@admin.com
+      PGADMIN_DEFAULT_PASSWORD: postgres
       PGADMIN_CONFIG_SERVER_MODE: 'False'
       PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
     volumes:
-       - pgadmin:/var/www/nest_test/docker-volumes/pgadmin
+       - pgadmin:/var/www/postgres/docker-volumes/pgadmin
     ports:
       - "127.0.0.1:5050:80"
     restart: unless-stopped
@@ -70,8 +80,8 @@ services:
       MINIO_SECRET_KEY: minio123
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
-      interval: 30s
-      timeout: 20s
+      interval: 5s
+      timeout: 5s
       retries: 3
     volumes:
       - minio-data:/data

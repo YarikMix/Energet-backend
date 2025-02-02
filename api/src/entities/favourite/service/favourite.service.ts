@@ -37,6 +37,9 @@ export class FavouriteService {
         },
       },
       where: { ownerId: userId },
+      order: {
+        created_date: 'ASC',
+      },
     } as FindManyOptions<Favourite>);
 
     let items = favourites.map((favourite) => {
