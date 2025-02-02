@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
+import { FindManyOptions, FindOneOptions, In, Repository } from 'typeorm';
 import { Order } from '@entities/order/models/order.entity';
 import { UpdateOrderDto } from '@entities/order/dto/updateOrder.dto';
 import { OrderItem } from '@entities/order/models/order-item.entity';
@@ -156,6 +156,13 @@ export class OrderService {
     });
   }
 
+  public async removeItemsFromOrder(order_id: number, items: number[]) {
+    return await this.orderItemRepository.delete({
+      orderId: order_id,
+      itemId: In(items),
+    });
+  }
+
   public async addItemToOrder(order_id: number, item_id: number) {
     const item = this.orderItemRepository.create({
       orderId: order_id,
@@ -163,5 +170,12 @@ export class OrderService {
     });
 
     return await this.orderItemRepository.save(item);
+  }
+
+  public async updateOrderStatusUser(id: number) {
+    return await this.orderRepository.update(
+      { id },
+      { status: E_OrderStatus.InWork },
+    );
   }
 }

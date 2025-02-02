@@ -3,10 +3,13 @@ import {
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Post,
   Put,
+  Req,
+  Res,
   UseInterceptors,
 } from '@nestjs/common';
 import { OrderService } from '@entities/order/service/order.service';
@@ -14,6 +17,7 @@ import { UpdateOrderDto } from '@entities/order/dto/updateOrder.dto';
 import { NotFoundInterceptor } from '@interceptors/interceptors';
 import { User } from '@services/auth/decorators/user.decorator';
 import { UpdateOrderItemCountDto } from '@entities/order/dto/updateOrderItemCount.dto';
+import { DeleteOrderItemsDto } from '@entities/order/dto/deleteOrderItems.dto';
 
 @Controller('orders')
 export class OrderController {
@@ -50,7 +54,7 @@ export class OrderController {
 
   @Delete('/draft')
   async deleteDraftOrder(@User() user) {
-    const draftOrder = await this.orderService.getDraftOrder(user);
+    const draftOrder = await this.orderService.getDraftOrder(user.id);
     return this.orderService.deleteOrder(draftOrder.id);
   }
 
@@ -62,6 +66,18 @@ export class OrderController {
   ) {
     await this.orderService.updateItemCount(order_id, item_id, body);
     return this.orderService.getOrder(order_id);
+  }
+
+  @Post('/:id/delete_items/')
+  async deleteItemsInOrder(
+    @Body() body: DeleteOrderItemsDto,
+    @Param('id', ParseIntPipe) order_id: number,
+    @User() user,
+  ) {
+    await this.orderService.removeItemsFromOrder(order_id, body.items);
+    const draftOrder = await this.orderService.getOrder(order_id, user.id);
+    // TODO: Нунжно ли уалять черновой заказ после очистки корзины?
+    return draftOrder;
   }
 
   @Delete('/:id/delete_item/:item_id')
@@ -90,5 +106,14 @@ export class OrderController {
     await this.orderService.addItemToOrder(draftOrder.id, item_id);
 
     return this.orderService.getOrder(draftOrder.id, user.id);
+  }
+
+  @Put('/:id/update_status_user')
+  async updateOrderStatusUser(
+    @Res({ passthrough: true }) res,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    await this.orderService.updateOrderStatusUser(id);
+    res.status(HttpStatus.OK).send();
   }
 }
