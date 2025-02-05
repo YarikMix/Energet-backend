@@ -20,6 +20,12 @@ export class Order {
   created_date: Date;
 
   @Column({
+    type: 'timestamptz',
+    nullable: true,
+  })
+  formation_date: Date;
+
+  @Column({
     name: 'status',
     type: 'enum',
     enum: E_OrderStatus,
@@ -32,9 +38,9 @@ export class Order {
   // @JoinColumn()
   owner: User;
 
-  // TODO
+  // // TODO;
   // @BeforeInsert()
-  // updateDates() {
+  // update() {
   //   this.created_date = new Date();
   // }
 }

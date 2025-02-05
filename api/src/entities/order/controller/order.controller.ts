@@ -8,7 +8,6 @@ import {
   ParseIntPipe,
   Post,
   Put,
-  Req,
   Res,
   UseInterceptors,
 } from '@nestjs/common';
@@ -29,7 +28,7 @@ export class OrderController {
   }
 
   @Get('/')
-  getAllOrders(@User() user) {
+  getOrders(@User() user) {
     return this.orderService.getOrders(user);
   }
 

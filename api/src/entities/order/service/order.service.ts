@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, FindOneOptions, In, Repository } from 'typeorm';
+import { FindManyOptions, FindOneOptions, In, Not, Repository } from 'typeorm';
 import { Order } from '@entities/order/models/order.entity';
 import { UpdateOrderDto } from '@entities/order/dto/updateOrder.dto';
 import { OrderItem } from '@entities/order/models/order-item.entity';
@@ -8,6 +8,9 @@ import { User } from '@entities/user/models/user.entity';
 import { E_OrderStatus } from '@entities/order/models/types';
 import { UpdateOrderItemCountDto } from '@entities/order/dto/updateOrderItemCount.dto';
 import { Favourite } from '@entities/favourite/models/favourite.entity';
+import { Item } from '@entities/items/models/item.entity';
+import { And } from 'typeorm';
+import { Equal } from 'typeorm';
 
 @Injectable()
 export class OrderService {
@@ -23,24 +26,37 @@ export class OrderService {
   ) {}
 
   public async getOrders(user: User) {
-    return await this.orderRepository.find({
+    const orders = await this.orderRepository.find({
       relations: ['owner'],
-      where: { owner: { id: user.id } },
+      where: {
+        owner: { id: user.id },
+        status: And(
+          Not(Equal(E_OrderStatus.Deleted)),
+          Not(Equal(E_OrderStatus.Draft)),
+        ),
+      },
       select: {
         owner: {
           id: true,
           name: true,
         },
       },
+      order: {
+        formation_date: 'DESC',
+      },
     } as FindOneOptions<Order>);
+
+    return await Promise.all(
+      orders.map(async (order) => {
+        return {
+          ...order,
+          price: await this.calculationTotalPrice(order),
+        };
+      }),
+    );
   }
 
   async getOrder(id: number, userId?: number) {
-    const rawItems = await this.orderItemRepository.find({
-      relations: ['item'],
-      where: { orderId: id },
-    });
-
     const order = await this.orderRepository.findOne({
       where: { id },
       relations: ['owner'],
@@ -52,6 +68,10 @@ export class OrderService {
       },
     } as FindOneOptions<Order>);
 
+    const rawItems = await this.orderItemRepository.find({
+      relations: ['item'],
+      where: { orderId: id },
+    });
     let items = rawItems.map((rawItem) => ({
       count: rawItem.count,
       ...rawItem.item,
@@ -75,7 +95,7 @@ export class OrderService {
       );
     }
 
-    return { ...order, items };
+    return { ...order, items, price: await this.calculationTotalPrice(order) };
   }
 
   public async getDraftOrder(userId: number) {
@@ -167,6 +187,7 @@ export class OrderService {
     const item = this.orderItemRepository.create({
       orderId: order_id,
       itemId: item_id,
+      created_date: new Date(),
     });
 
     return await this.orderItemRepository.save(item);
@@ -175,7 +196,23 @@ export class OrderService {
   public async updateOrderStatusUser(id: number) {
     return await this.orderRepository.update(
       { id },
-      { status: E_OrderStatus.InWork },
+      { status: E_OrderStatus.InWork, formation_date: new Date() },
     );
   }
+
+  calculationTotalPrice = async (order) => {
+    const query = await this.orderRepository
+      .createQueryBuilder('order')
+      .select()
+      .where('order.owner = :userId AND order.id = :orderId', {
+        userId: order.owner.id,
+        orderId: order.id,
+      })
+      .leftJoinAndSelect(OrderItem, 'mm', 'mm.orderId = order.id')
+      .leftJoinAndSelect(Item, 'item', 'mm.itemId = item.id')
+      .select('SUM(mm.count * item.price)')
+      .getRawOne();
+
+    return parseInt(query.sum);
+  };
 }

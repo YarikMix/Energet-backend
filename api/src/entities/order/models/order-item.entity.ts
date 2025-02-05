@@ -33,7 +33,7 @@ export class OrderItem {
 
   @Column({
     type: 'int',
-    default: 0,
+    default: 1,
   })
   count: number;
 
