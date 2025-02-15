@@ -118,6 +118,8 @@ export class MainSeeder implements Seeder {
       'Аккумулятор',
       'Солнечная панель',
       'Ветрогенератор',
+      'Дизель',
+      'Генераторная установка',
     ].map((name) => {
       const itemType = new ItemType();
       itemType.name = name;
@@ -140,11 +142,16 @@ export class MainSeeder implements Seeder {
 
     const images = ['1.jpg', '2.jpg', '3.jpg', '4.jpg'];
 
+    const solarPanelPowerRange = [
+      ...Array.from({ length: 7 }, (_, i) => 360 + i * 5),
+      ...Array.from({ length: 8 }, (_, i) => 460 + i * 5),
+    ]; // Самые распространенные 360-390, 460-495 с шагом 5
+
     const items = await Promise.all(
       Array(ITEMS_COUNT)
         .fill('')
         .map(async () => {
-          return await itemFactory.make({
+          const item = await itemFactory.make({
             image:
               'http://localhost:9000/images/items/' +
               faker.helpers.arrayElement(images),
@@ -152,6 +159,22 @@ export class MainSeeder implements Seeder {
             item_type: faker.helpers.arrayElement(itemsTypes),
             item_producer: faker.helpers.arrayElement(itemProducers),
           });
+
+          if (item.item_type == itemsTypes[0]) {
+            item.power = 500 * faker.helpers.rangeToNumber({ min: 1, max: 10 });
+          } else if (item.item_type == itemsTypes[1]) {
+            item.power = 500 * faker.helpers.rangeToNumber({ min: 1, max: 4 });
+          } else if ((item.item_type = itemsTypes[2])) {
+            item.power = faker.helpers.arrayElement(solarPanelPowerRange);
+          } else if (item.item_type === itemsTypes[3]) {
+            item.power = 500 * faker.helpers.rangeToNumber({ min: 1, max: 8 });
+          } else if (item.item_type === itemsTypes[4]) {
+            item.power = 1000 * faker.helpers.rangeToNumber({ min: 1, max: 5 });
+          } else if (item.item_type === itemsTypes[5]) {
+            item.power = 1000 * faker.helpers.rangeToNumber({ min: 1, max: 5 });
+          }
+
+          return item;
         }),
     );
 

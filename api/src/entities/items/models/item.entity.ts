@@ -2,9 +2,7 @@ import {
   Column,
   Entity,
   JoinColumn,
-  ManyToMany,
   ManyToOne,
-  PrimaryColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { E_ItemStatus } from '@entities/items/models/types';
@@ -33,8 +31,11 @@ export class Item {
   @Column({ name: 'price', type: 'int' })
   price: number;
 
-  @Column({ name: 'float', type: 'float' })
+  @Column({ name: 'weight', type: 'float' })
   weight: number;
+
+  @Column({ name: 'power', type: 'int' })
+  power: number;
 
   @Column({
     name: 'status',

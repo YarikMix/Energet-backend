@@ -10,6 +10,7 @@ import { AuthModule } from '@services/auth/auth.module';
 import { MinioService } from '@services/minio/minio.service';
 import { AppLoggerMiddleware } from './middleware/logger';
 import { FavouriteModule } from '@entities/favourite/favourite.module';
+import { ConfiguratorModule } from '@services/configurator/configurator.controller';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { FavouriteModule } from '@entities/favourite/favourite.module';
     UsersModule,
     AuthModule,
     FavouriteModule,
+    ConfiguratorModule,
   ],
   providers: [
     {

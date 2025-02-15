@@ -23,20 +23,20 @@ services:
     links:
       - postgres
       - minio
-      # - configurator
+      - configurator
 
-  # configurator:
-  #   build:
-  #     dockerfile: Dockerfile
-  #     context: ./configurator
-  #   command: npm run start
-  #   environment:
-  #     NODE_ENV: development
-  #     PORT: 3000
-  #   volumes:
-  #     - ./configurator/src:/app/src
-  #   ports:
-  #     - "8000:3000"
+  configurator:
+     build:
+       dockerfile: Dockerfile
+       context: ./configurator
+     command: npm run dev
+     environment:
+       NODE_ENV: development
+       PORT: 5000
+     volumes:
+       - ./configurator/src:/app/src
+     ports:
+       - "8001:5000"
 
   postgres:
     image: postgres:15.0
