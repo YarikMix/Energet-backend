@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Item } from '@entities/items/models/item.entity';
 import { FindOneOptions, Repository } from 'typeorm';
+import { faker } from '@faker-js/faker';
 
 @Injectable()
 export class ConfiguratorService {
@@ -21,8 +22,8 @@ export class ConfiguratorService {
     if (data[0] != 0) {
       const solarPower = data[0];
       const invertorPower = solarPower / 1.1;
-      console.log('solarPower', solarPower);
-      console.log('invertorPower', invertorPower);
+      // console.log('solarPower', solarPower);
+      // console.log('invertorPower', invertorPower);
 
       const solar_items = await this.itemRepository.find({
         relations: ['item_type'],
@@ -48,9 +49,9 @@ export class ConfiguratorService {
         }
       }
 
-      console.log('min_solar_price', min_solar_price);
-      console.log('min_solar_count', min_solar_count);
-      console.log(min_solar_item);
+      // console.log('min_solar_price', min_solar_price);
+      // console.log('min_solar_count', min_solar_count);
+      // console.log(min_solar_item);
 
       const invertor_items = await this.itemRepository.find({
         relations: ['item_type'],
@@ -78,18 +79,18 @@ export class ConfiguratorService {
         }
       }
 
-      console.log('min_invertor_price', min_invertor_price);
-      console.log('min_invertor_count', min_invertor_count);
-      console.log(min_invertor_item);
+      // console.log('min_invertor_price', min_invertor_price);
+      // console.log('min_invertor_count', min_invertor_count);
+      // console.log(min_invertor_item);
 
       const items = [
         {
-          item: min_solar_item,
+          item: faker.helpers.arrayElement(solar_items),
           total_count: min_solar_count,
           total_price: min_solar_price,
         },
         {
-          item: min_invertor_item,
+          item: faker.helpers.arrayElement(invertor_items),
           total_count: min_invertor_count,
           total_price: min_invertor_price,
         },
