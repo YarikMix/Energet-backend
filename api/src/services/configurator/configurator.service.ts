@@ -85,11 +85,13 @@ export class ConfiguratorService {
 
       const items = [
         {
+          // item: min_solar_item,
           item: faker.helpers.arrayElement(solar_items),
           total_count: min_solar_count,
           total_price: min_solar_price,
         },
         {
+          // item: min_invertor_item,
           item: faker.helpers.arrayElement(invertor_items),
           total_count: min_invertor_count,
           total_price: min_invertor_price,
