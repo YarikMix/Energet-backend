@@ -5,7 +5,7 @@ import { MainSeeder } from './main.seeder';
 import * as process from 'process';
 import { UserFactory } from './user.factory';
 import { OrderFactory } from './order.factory';
-import { ItemFactory } from './item.factory';
+import { ItemFactory, ItemTypeFactory } from './item.factory';
 import { OrderItemFactory } from './orderItem.factory';
 import { FavouriteFactory } from './favourite.factory';
 
@@ -17,6 +17,7 @@ const options: DataSourceOptions & SeederOptions = {
     ItemFactory,
     OrderItemFactory,
     FavouriteFactory,
+    ItemTypeFactory,
   ],
   seeds: [MainSeeder],
 };

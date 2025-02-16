@@ -107,6 +107,19 @@ export class OrderController {
     return this.orderService.getOrder(draftOrder.id, user.id);
   }
 
+  @Post('/add_items_to_draft_order/')
+  async addItemsToOrder(@Body() items, @User() user) {
+    let draftOrder = await this.orderService.getDraftOrder(user.id);
+
+    if (!draftOrder) {
+      draftOrder = await this.orderService.createOrder(user);
+    }
+
+    await this.orderService.addItemsToOrder(draftOrder.id, items);
+
+    return this.orderService.getOrder(draftOrder.id, user.id);
+  }
+
   @Put('/:id/update_status_user')
   async updateOrderStatusUser(
     @Res({ passthrough: true }) res,

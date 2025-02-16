@@ -200,6 +200,40 @@ export class OrderService {
     );
   }
 
+  public async addItemsToOrder(order_id: number, items) {
+    for (const i of items) {
+      const isExists = await this.orderItemRepository.exists({
+        where: {
+          orderId: order_id,
+          itemId: i.id,
+        },
+      });
+
+      if (isExists) {
+        const item = await this.orderItemRepository.findOne({
+          where: {
+            orderId: order_id,
+            itemId: i.id,
+          },
+        });
+
+        await this.orderItemRepository.update(
+          { orderId: order_id, itemId: i.id },
+          { count: item.count + i.count },
+        );
+      } else {
+        const item = this.orderItemRepository.create({
+          orderId: order_id,
+          itemId: i.id,
+          count: i.count,
+          created_date: new Date(),
+        });
+
+        await this.orderItemRepository.save(item);
+      }
+    }
+  }
+
   calculationTotalPrice = async (order) => {
     const query = await this.orderRepository
       .createQueryBuilder('order')

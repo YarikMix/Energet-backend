@@ -18,7 +18,6 @@ import {
 import { ItemsService } from '../service/items.service';
 import { CreateItemDto } from '../dto/createItem.dto';
 import { UpdateItemDto } from '../dto/updateItem.dto';
-import { NotFoundInterceptor } from '@interceptors/interceptors';
 import { Public } from '@services/auth/decorators/public.decorator';
 import { MinioService } from '@services/minio/minio.service';
 import { FileInterceptor } from '@nestjs/platform-express';

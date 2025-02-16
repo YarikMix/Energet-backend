@@ -18,23 +18,23 @@ export class Item {
   @Column({ name: 'name', type: 'varchar' })
   name: string;
 
-  // @Column({ name: 'itemTypeId', type: 'int' })
-  // itemTypeId: number;
+  @Column({ name: 'itemTypeId', type: 'int' })
+  itemTypeId: number;
 
   @ManyToOne(() => ItemType, (itemType) => itemType.id)
-  // @JoinColumn({ name: 'itemTypeId' })
+  @JoinColumn({ name: 'itemTypeId' })
   item_type: ItemType;
 
   @ManyToOne(() => ItemProducer, (itemProducer) => itemProducer.id)
   item_producer: ItemProducer;
 
-  @Column({ name: 'price', type: 'int' })
+  @Column({ name: 'price', type: 'int', nullable: true })
   price: number;
 
   @Column({ name: 'weight', type: 'float' })
   weight: number;
 
-  @Column({ name: 'power', type: 'int' })
+  @Column({ name: 'power', type: 'int', nullable: true })
   power: number;
 
   @Column({
@@ -48,7 +48,7 @@ export class Item {
   @Column({
     name: 'image',
     type: 'varchar',
-    default: 'http://localhost:9000/images/items/default.jpg',
+    default: 'http://localhost:9000/images/items/default.png',
   })
   image: string;
 
