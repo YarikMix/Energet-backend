@@ -112,8 +112,8 @@ export class MainSeeder implements Seeder {
     console.log('seeding items');
     const itemFactory = factoryManager.get(Item);
     const itemsRepo = dataSource.getRepository(Item);
-    const itemsTypeRepo = dataSource.getRepository(ItemType);
     const itemsTypeFactory = factoryManager.get(ItemType);
+    const itemsTypeRepo = dataSource.getRepository(ItemType);
     const itemsProducerRepo = dataSource.getRepository(ItemProducer);
 
     let itemsTypes = await Promise.all(
@@ -131,22 +131,6 @@ export class MainSeeder implements Seeder {
       }),
     );
     itemsTypes = await itemsTypeRepo.save(itemsTypes);
-
-    const logger = new Logger('HTTPS');
-    logger.log('itemsTypes.length: ' + itemsTypes.length);
-
-    for (const itemType of itemsTypes) {
-      console.log('itemType(' + itemType.id + '): ' + itemType.name);
-    }
-
-    logger.log('itemsTypes[0]: ' + itemsTypes[0].name);
-    logger.log('itemsTypes[1]: ' + itemsTypes[1].name);
-    logger.log('itemsTypes[2]: ' + itemsTypes[2].name);
-    logger.log('itemsTypes[3]: ' + itemsTypes[3].name);
-    logger.log(
-      'itemsTypes[4]: ' + itemsTypes[4].name + ' id(' + itemsTypes[4].id + ')',
-    );
-    logger.log('itemsTypes[5]: ' + itemsTypes[5].name);
 
     let itemProducers = [
       'Hevel',
@@ -172,17 +156,11 @@ export class MainSeeder implements Seeder {
         .map(async () => {
           const item = await itemFactory.make({
             owner: faker.helpers.arrayElement(producers),
-            itemTypeId: 5,
+            item_type: faker.helpers.arrayElement(itemsTypes),
             item_producer: faker.helpers.arrayElement(itemProducers),
           });
 
-          console.log('item', item.itemTypeId);
-          console.log(
-            'item.item_type == undefined',
-            item.item_type == undefined,
-          );
-
-          if (item.itemTypeId == 1) {
+          if (item.item_type.id == 1) {
             item.power = 500 * faker.helpers.rangeToNumber({ min: 1, max: 10 });
             item.price = Math.round(
               1000 * (item.power / 5000) * generateRandomFloat(0.9, 1.1),
@@ -191,9 +169,9 @@ export class MainSeeder implements Seeder {
               'http://localhost:9000/images/items/' +
               faker.helpers.rangeToNumber({ min: 1, max: 4 }) +
               '.png';
-          } else if (item.itemTypeId == 2) {
+          } else if (item.item_type.id == 2) {
             item.power = 500 * faker.helpers.rangeToNumber({ min: 1, max: 4 });
-          } else if ((item.itemTypeId = 3)) {
+          } else if (item.item_type.id == 3) {
             item.power = faker.helpers.arrayElement(solarPanelPowerRange);
             item.price = Math.round(
               1000 * (item.power / 490) * generateRandomFloat(0.9, 1.1),
@@ -202,11 +180,11 @@ export class MainSeeder implements Seeder {
               'http://localhost:9000/images/items/' +
               faker.helpers.rangeToNumber({ min: 5, max: 8 }) +
               '.png';
-          } else if (item.itemTypeId == 4) {
+          } else if (item.item_type.id == 4) {
             item.power = 500 * faker.helpers.rangeToNumber({ min: 1, max: 8 });
-          } else if (item.itemTypeId == 5) {
+          } else if (item.item_type.id == 5) {
             item.power = 1000 * faker.helpers.rangeToNumber({ min: 1, max: 5 });
-          } else if (item.itemTypeId == 6) {
+          } else if (item.item_type.id == 6) {
             item.power = 1000 * faker.helpers.rangeToNumber({ min: 1, max: 5 });
           }
 

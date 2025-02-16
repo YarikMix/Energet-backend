@@ -18,11 +18,11 @@ export class Item {
   @Column({ name: 'name', type: 'varchar' })
   name: string;
 
-  @Column({ name: 'itemTypeId', type: 'int' })
-  itemTypeId: number;
+  // @Column({ name: 'itemTypeId', type: 'int' })
+  // itemTypeId: number;
 
   @ManyToOne(() => ItemType, (itemType) => itemType.id)
-  @JoinColumn({ name: 'itemTypeId' })
+  // @JoinColumn({ name: 'itemTypeId' })
   item_type: ItemType;
 
   @ManyToOne(() => ItemProducer, (itemProducer) => itemProducer.id)
