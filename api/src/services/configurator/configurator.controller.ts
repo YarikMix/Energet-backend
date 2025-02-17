@@ -23,6 +23,10 @@ export class ConfiguratorController {
 
     const data = await this.configuratorService.calc(body);
 
+    if (!data) {
+      res.status(HttpStatus.BAD_REQUEST).send();
+    }
+
     res.status(HttpStatus.OK).send(data);
   }
 }
