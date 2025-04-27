@@ -30,9 +30,6 @@ export class DraftService {
   }
 
   public async create(dto, owner) {
-    console.log('create draft');
-    console.log('dto', dto);
-    console.log('owner', owner);
     const newDraft = this.draftRepository.create();
     newDraft.owner = owner;
     newDraft.coords = dto.coords;
@@ -48,5 +45,9 @@ export class DraftService {
       ...savedDraft,
       owner_id: owner.id,
     };
+  }
+
+  public async delete(id) {
+    return await this.draftRepository.delete(id);
   }
 }

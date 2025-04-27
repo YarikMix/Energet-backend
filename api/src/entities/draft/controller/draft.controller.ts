@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { User } from '@services/auth/decorators/user.decorator';
 import { DraftService } from '@entities/draft/service/draft.service';
 import { CreateDraftDto } from '@entities/draft/dto/createDraft.dto';
@@ -14,7 +14,13 @@ export class DraftController {
 
   @Post('/')
   createDraft(@Body() createDraftDto: CreateDraftDto, @User() user) {
-    console.log('createDraft');
     return this.draftService.create(createDraftDto, user);
+  }
+
+  @Delete('/:id')
+  async deleteDraft(@Param('id') id: string, @User() user) {
+    await this.draftService.delete(id);
+
+    return this.draftService.get(user.id);
   }
 }
