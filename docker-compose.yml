@@ -35,8 +35,6 @@ services:
        PORT: 5000
      volumes:
        - ./configurator/src:/app/src
-     ports:
-       - "8001:5000"
 
   postgres:
     image: postgres:15.0

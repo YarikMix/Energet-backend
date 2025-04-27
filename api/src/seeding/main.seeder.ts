@@ -12,7 +12,6 @@ import { ItemType } from '@entities/items/models/item-type.entity';
 import { ItemProducer } from '@entities/items/models/item-producer.entity';
 import { Favourite } from '@entities/favourite/models/favourite.entity';
 import { generateRandomFloat } from '../utils/helpers';
-import { Logger } from '@nestjs/common';
 
 const ITEMS_COUNT = 51;
 const ITEMS_IN_ORDER_COUNT = 3;
@@ -38,9 +37,9 @@ export class MainSeeder implements Seeder {
       producers,
     );
 
-    // await this.generateFavourites(factoryManager, dataSource, users, items);
+    await this.generateFavourites(factoryManager, dataSource, users, items);
 
-    // await this.generateOrders(factoryManager, dataSource, users, items);
+    await this.generateOrders(factoryManager, dataSource, users, items);
   }
 
   generateFavourites = async (
@@ -122,8 +121,8 @@ export class MainSeeder implements Seeder {
         'Аккумулятор',
         'Солнечная панель',
         'Ветрогенератор',
-        'Дизель',
         'Генераторная установка',
+        'Дизель',
       ].map(async (name) => {
         return await itemsTypeFactory.make({
           name,
@@ -150,6 +149,9 @@ export class MainSeeder implements Seeder {
       ...Array.from({ length: 8 }, (_, i) => 460 + i * 5),
     ]; // Самые распространенные 360-390, 460-495 с шагом 5
 
+    const generatePrice = (power, k: number) =>
+      Math.round(1000 * ((power / 500) * k) * generateRandomFloat(0.9, 1.1));
+
     const items = await Promise.all(
       Array(ITEMS_COUNT)
         .fill('')
@@ -162,30 +164,31 @@ export class MainSeeder implements Seeder {
 
           if (item.item_type.id == 1) {
             item.power = 500 * faker.helpers.rangeToNumber({ min: 1, max: 10 });
-            item.price = Math.round(
-              1000 * (item.power / 5000) * generateRandomFloat(0.9, 1.1),
-            );
+            console.log('item.power', item.power);
+            item.price = generatePrice(item.power, 10);
             item.image =
               'http://localhost:9000/images/items/' +
               faker.helpers.rangeToNumber({ min: 1, max: 4 }) +
               '.png';
           } else if (item.item_type.id == 2) {
             item.power = 500 * faker.helpers.rangeToNumber({ min: 1, max: 4 });
+            item.price = generatePrice(item.power, 4);
           } else if (item.item_type.id == 3) {
             item.power = faker.helpers.arrayElement(solarPanelPowerRange);
-            item.price = Math.round(
-              1000 * (item.power / 490) * generateRandomFloat(0.9, 1.1),
-            );
+            item.price = generatePrice(item.power, 10);
             item.image =
               'http://localhost:9000/images/items/' +
               faker.helpers.rangeToNumber({ min: 5, max: 8 }) +
               '.png';
           } else if (item.item_type.id == 4) {
             item.power = 500 * faker.helpers.rangeToNumber({ min: 1, max: 8 });
+            item.price = generatePrice(item.power, 8);
           } else if (item.item_type.id == 5) {
-            item.power = 1000 * faker.helpers.rangeToNumber({ min: 1, max: 5 });
+            item.power = 1000 * faker.helpers.rangeToNumber({ min: 1, max: 6 });
+            item.price = generatePrice(item.power, 6);
           } else if (item.item_type.id == 6) {
-            item.power = 1000 * faker.helpers.rangeToNumber({ min: 1, max: 5 });
+            item.power = 1000 * faker.helpers.rangeToNumber({ min: 1, max: 7 });
+            item.price = generatePrice(item.power, 7);
           }
 
           return item;

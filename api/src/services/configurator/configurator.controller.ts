@@ -19,12 +19,11 @@ export class ConfiguratorController {
     @Res({ passthrough: true }) res: Response,
     @Body() body,
   ) {
-    // console.log('body', body);
-
     const data = await this.configuratorService.calc(body);
 
     if (!data) {
       res.status(HttpStatus.BAD_REQUEST).send();
+      return;
     }
 
     res.status(HttpStatus.OK).send(data);
