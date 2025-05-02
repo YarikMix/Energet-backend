@@ -11,8 +11,17 @@ import { MinioService } from '@services/minio/minio.service';
 import { ItemType } from '@entities/items/models/item-type.entity';
 import { ItemProducer } from '@entities/items/models/item-producer.entity';
 import { Favourite } from '@entities/favourite/models/favourite.entity';
-import { generateRandomFloat } from '../utils/helpers';
-import { ITEM_PRODUCERS, ITEMS_CATEGORIES } from '../utils/constants';
+import { generateRandomFloat, generateRandomInt } from '../utils/helpers';
+import {
+  BATTERY_MOCKS,
+  DIESEL_GENERATOR_MOCKS,
+  INVERTOR_MOCKS,
+  ITEM_PRODUCERS,
+  ITEMS_CATEGORIES,
+  SOLAR_PANEL_MOCKS,
+  TERMO_GENERATOR_MOCKS,
+  WIND_GENERATOR_MOCKS,
+} from '../utils/constants';
 
 const ITEMS_COUNT = 51;
 const ITEMS_IN_ORDER_COUNT = 3;
@@ -161,6 +170,31 @@ export class MainSeeder implements Seeder {
       return `items/${category}/${faker.helpers.rangeToNumber({ min: 1, max })}.png`;
     };
 
+    const getItemNames = (item_type: number) => {
+      switch (item_type) {
+        case 1:
+          return INVERTOR_MOCKS;
+        case 2:
+          return BATTERY_MOCKS;
+        case 3:
+          return SOLAR_PANEL_MOCKS;
+        case 4:
+          return WIND_GENERATOR_MOCKS;
+        case 5:
+          return TERMO_GENERATOR_MOCKS;
+        case 6:
+          return DIESEL_GENERATOR_MOCKS;
+        default:
+          return ['Название'];
+      }
+    };
+
+    const generateItemName = (item_type: number) => {
+      const names = getItemNames(item_type);
+
+      return `${faker.helpers.arrayElement(names)} ${100 * generateRandomInt(10, 100)}`;
+    };
+
     const items = await Promise.all(
       Array(ITEMS_COUNT)
         .fill('')
@@ -170,6 +204,8 @@ export class MainSeeder implements Seeder {
             item_type: faker.helpers.arrayElement(itemsTypes),
             item_producer: faker.helpers.arrayElement(itemProducers),
           });
+
+          item.name = generateItemName(item.item_type.id);
 
           if (item.item_type.id == 1) {
             item.power = 500 * faker.helpers.rangeToNumber({ min: 1, max: 10 });
