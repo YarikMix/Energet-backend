@@ -13,7 +13,7 @@ export class DraftService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  public async get(user: User) {
+  public async getAll(user: User) {
     return await this.draftRepository.find({
       relations: ['owner'],
       where: {

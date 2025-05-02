@@ -29,7 +29,7 @@ const ITEMS_IN_ORDER_COUNT = 3;
 const USERS_COUNT = 10;
 const MODERATORS_COUNT = 3;
 const PRODUCERS_COUNT = 5;
-const USER_ORDERS_COUNT = 3;
+const USER_ORDERS_COUNT = 5;
 const USER_CONFIGURATOR_DRAFTS_COUNT = 5;
 const FAVOURITES_FOR_USER_COUNT = 5;
 
@@ -143,23 +143,24 @@ export class MainSeeder implements Seeder {
     const itemFactory = factoryManager.get(Item);
     const itemsRepo = dataSource.getRepository(Item);
     const itemsTypeFactory = factoryManager.get(ItemType);
-    const itemsTypeRepo = dataSource.getRepository(ItemType);
     const itemsProducerRepo = dataSource.getRepository(ItemProducer);
+    const itemsProducerFactory = factoryManager.get(ItemProducer);
 
-    let itemsTypes = await Promise.all(
+    const itemsTypes = await Promise.all(
       ITEMS_CATEGORIES.map(async (name) => {
-        return await itemsTypeFactory.make({
+        return await itemsTypeFactory.save({
           name,
         });
       }),
     );
-    itemsTypes = await itemsTypeRepo.save(itemsTypes);
 
-    let itemProducers = ITEM_PRODUCERS.map((name) => {
-      const itemProducer = new ItemProducer();
-      itemProducer.name = name;
-      return itemProducer;
-    });
+    let itemProducers = await Promise.all(
+      ITEM_PRODUCERS.map(async (name) => {
+        return await itemsProducerFactory.make({
+          name,
+        });
+      }),
+    );
     itemProducers = await itemsProducerRepo.save(itemProducers);
 
     const solarPanelPowerRange = [
@@ -265,7 +266,6 @@ export class MainSeeder implements Seeder {
     items: Item[],
   ) => {
     console.log('seeding orders');
-    const ordersRepo = dataSource.getRepository(Order);
     const orderFactory = factoryManager.get(Order);
 
     await Promise.all(
@@ -277,16 +277,9 @@ export class MainSeeder implements Seeder {
         });
 
         // Создаем остальные заказы покупателю
-        const orders = await Promise.all(
-          Array(USER_ORDERS_COUNT)
-            .fill('')
-            .map(async () => {
-              return await orderFactory.make({
-                owner: user,
-              });
-            }),
-        );
-        await ordersRepo.save(orders);
+        const orders = await orderFactory.saveMany(USER_ORDERS_COUNT, {
+          owner: user,
+        });
 
         // Наполняем заказы оборудованием
         const orderItemFactory = factoryManager.get(OrderItem);
@@ -316,26 +309,13 @@ export class MainSeeder implements Seeder {
     users: User[],
   ) => {
     console.log('seeding drafts');
-    const draftsRepo = dataSource.getRepository(Draft);
     const draftFactory = factoryManager.get(Draft);
 
-    console.log('users.length', users.length);
     await Promise.all(
       users.map(async (user) => {
-        console.log('user', user);
-        // Создаем черновики конфигуратора покупателю
-        const drafts = await Promise.all(
-          Array(USER_CONFIGURATOR_DRAFTS_COUNT)
-            .fill('')
-            .map(async () => {
-              return await draftFactory.make({
-                owner: user,
-              });
-            }),
-        );
-        console.log('drafts.length', drafts.length);
-        console.log('drafts', drafts);
-        await draftsRepo.save(drafts);
+        await draftFactory.saveMany(USER_CONFIGURATOR_DRAFTS_COUNT, {
+          owner: user,
+        });
       }),
     );
   };

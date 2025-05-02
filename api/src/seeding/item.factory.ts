@@ -3,6 +3,7 @@ import { Item } from '@entities/items/models/item.entity';
 import { E_ItemStatus } from '@entities/items/models/types';
 import { faker } from '@faker-js/faker';
 import { ItemType } from '@entities/items/models/item-type.entity';
+import { ItemProducer } from '@entities/items/models/item-producer.entity';
 
 export const ItemFactory = setSeederFactory(Item, () => {
   const item = new Item();
@@ -14,4 +15,8 @@ export const ItemFactory = setSeederFactory(Item, () => {
 
 export const ItemTypeFactory = setSeederFactory(ItemType, () => {
   return new ItemType();
+});
+
+export const ItemProducerFactory = setSeederFactory(ItemProducer, () => {
+  return new ItemProducer();
 });
