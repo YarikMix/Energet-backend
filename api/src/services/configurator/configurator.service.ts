@@ -109,29 +109,29 @@ export class ConfiguratorService {
         return result;
       };
 
-      const test = [
+      const categories = [
         {
           power: data[0],
-          category: 3,
+          id: 3,
         },
         {
           power: data[1],
-          category: 4,
+          id: 4,
         },
         {
           power: data[2],
-          category: 5,
+          id: 5,
         },
         {
           power: data[3],
-          category: 6,
+          id: 6,
         },
       ];
 
-      for (const item of test) {
+      for (const category of categories) {
         const optimalKit = await calculateItemCategory(
-          item.category,
-          item.power,
+          category.id,
+          category.power,
         );
 
         if (optimalKit) {

@@ -12,6 +12,7 @@ import { ItemType } from '@entities/items/models/item-type.entity';
 import { ItemProducer } from '@entities/items/models/item-producer.entity';
 import { Favourite } from '@entities/favourite/models/favourite.entity';
 import { generateRandomFloat } from '../utils/helpers';
+import { ITEM_PRODUCERS, ITEMS_CATEGORIES } from '../utils/constants';
 
 const ITEMS_COUNT = 51;
 const ITEMS_IN_ORDER_COUNT = 3;
@@ -77,30 +78,47 @@ export class MainSeeder implements Seeder {
   generateUsers = async (
     factoryManager: SeederFactoryManager,
     dataSource: DataSource,
-  ): Promise<{ users: User[]; producers: User[] }> => {
+  ): Promise<{ users: User[]; producers: User[]; moderators: User[] }> => {
     console.log('seeding users');
     const userFactory = factoryManager.get(User);
     const usersRepo = dataSource.getRepository(User);
 
-    const testUser = await userFactory.make({
-      email: 'user@user.com',
-    });
-    await usersRepo.save(testUser);
-
     // Создаем покупателей
+    const testBuyer = await userFactory.make({
+      email: 'user@user.com',
+      role: E_UserType.Buyer,
+    });
+    await usersRepo.save(testBuyer);
+
     const users = await userFactory.saveMany(USERS_COUNT);
 
     // Создаем поставщиков
+    const testProducer = await userFactory.make({
+      email: 'user2@user.com',
+      role: E_UserType.Producer,
+    });
+    await usersRepo.save(testProducer);
+
     const producers = await userFactory.saveMany(PRODUCERS_COUNT, {
       role: E_UserType.Producer,
     });
 
     // Создаем модераторов
-    await userFactory.saveMany(MODERATORS_COUNT, {
+    const testModerator = await userFactory.make({
+      email: 'user3@user.com',
+      role: E_UserType.Moderator,
+    });
+    await usersRepo.save(testModerator);
+
+    const moderators = await userFactory.saveMany(MODERATORS_COUNT, {
       role: E_UserType.Moderator,
     });
 
-    return { users: [testUser, ...users], producers };
+    return {
+      users: [testBuyer, ...users],
+      producers: [testProducer, ...producers],
+      moderators: [testModerator, ...moderators],
+    };
   };
 
   generateItems = async (
@@ -116,14 +134,7 @@ export class MainSeeder implements Seeder {
     const itemsProducerRepo = dataSource.getRepository(ItemProducer);
 
     let itemsTypes = await Promise.all(
-      [
-        'Инвертор',
-        'Аккумулятор',
-        'Солнечная панель',
-        'Ветрогенератор',
-        'Генераторная установка',
-        'Дизель',
-      ].map(async (name) => {
+      ITEMS_CATEGORIES.map(async (name) => {
         return await itemsTypeFactory.make({
           name,
         });
@@ -131,13 +142,7 @@ export class MainSeeder implements Seeder {
     );
     itemsTypes = await itemsTypeRepo.save(itemsTypes);
 
-    let itemProducers = [
-      'Hevel',
-      'ROSVETRO',
-      'Sila',
-      'SilaSolar',
-      'SunStonePower',
-    ].map((name) => {
+    let itemProducers = ITEM_PRODUCERS.map((name) => {
       const itemProducer = new ItemProducer();
       itemProducer.name = name;
       return itemProducer;
@@ -152,6 +157,10 @@ export class MainSeeder implements Seeder {
     const generatePrice = (power, k: number) =>
       Math.round(1000 * ((power / 500) * k) * generateRandomFloat(0.9, 1.1));
 
+    const getRandomItemImage = (category: string, max = 4) => {
+      return `items/${category}/${faker.helpers.rangeToNumber({ min: 1, max })}.png`;
+    };
+
     const items = await Promise.all(
       Array(ITEMS_COUNT)
         .fill('')
@@ -164,31 +173,28 @@ export class MainSeeder implements Seeder {
 
           if (item.item_type.id == 1) {
             item.power = 500 * faker.helpers.rangeToNumber({ min: 1, max: 10 });
-            console.log('item.power', item.power);
             item.price = generatePrice(item.power, 10);
-            item.image =
-              'http://localhost:9000/images/items/' +
-              faker.helpers.rangeToNumber({ min: 1, max: 4 }) +
-              '.png';
+            item.image = getRandomItemImage('invertor');
           } else if (item.item_type.id == 2) {
             item.power = 500 * faker.helpers.rangeToNumber({ min: 1, max: 4 });
             item.price = generatePrice(item.power, 4);
+            item.image = getRandomItemImage('battery');
           } else if (item.item_type.id == 3) {
             item.power = faker.helpers.arrayElement(solarPanelPowerRange);
             item.price = generatePrice(item.power, 10);
-            item.image =
-              'http://localhost:9000/images/items/' +
-              faker.helpers.rangeToNumber({ min: 5, max: 8 }) +
-              '.png';
+            item.image = getRandomItemImage('solar');
           } else if (item.item_type.id == 4) {
             item.power = 500 * faker.helpers.rangeToNumber({ min: 1, max: 8 });
             item.price = generatePrice(item.power, 8);
+            item.image = getRandomItemImage('wind_gen');
           } else if (item.item_type.id == 5) {
             item.power = 1000 * faker.helpers.rangeToNumber({ min: 1, max: 6 });
             item.price = generatePrice(item.power, 6);
+            item.image = getRandomItemImage('termo_gen');
           } else if (item.item_type.id == 6) {
             item.power = 1000 * faker.helpers.rangeToNumber({ min: 1, max: 7 });
             item.price = generatePrice(item.power, 7);
+            item.image = getRandomItemImage('diesel_gen');
           }
 
           return item;
@@ -202,35 +208,12 @@ export class MainSeeder implements Seeder {
       'src/assets/default.png',
     );
 
-    await Promise.all(
-      Array(4)
-        .fill(null)
-        .map((_, i) => i + 1)
-        .map(async (i) => {
-          const serverImageName = i + '.png';
-          const localImageName = i + '.png';
-          return await minio.uploadLocalFile(
-            'items',
-            serverImageName,
-            'src/assets/invertor/' + localImageName,
-          );
-        }),
-    );
-
-    await Promise.all(
-      Array(4)
-        .fill(null)
-        .map((_, i) => i + 1)
-        .map(async (i) => {
-          const serverImageName = i + 4 + '.png';
-          const localImageName = i + '.png';
-          return await minio.uploadLocalFile(
-            'items',
-            serverImageName,
-            'src/assets/solar/' + localImageName,
-          );
-        }),
-    );
+    await minio.uploadLocalFolder('items/invertor', 'src/assets/invertor');
+    await minio.uploadLocalFolder('items/battery', 'src/assets/battery');
+    await minio.uploadLocalFolder('items/solar', 'src/assets/solar');
+    await minio.uploadLocalFolder('items/wind_gen', 'src/assets/wind_gen');
+    await minio.uploadLocalFolder('items/termo_gen', 'src/assets/termo_gen');
+    await minio.uploadLocalFolder('items/diesel_gen', 'src/assets/diesel_gen');
 
     return await itemsRepo.save(items);
   };

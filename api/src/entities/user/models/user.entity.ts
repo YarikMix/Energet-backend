@@ -22,6 +22,7 @@ export class User {
     name: 'role',
     type: 'enum',
     enum: E_UserType,
+    // default: E_UserType.Buyer,
     nullable: true,
   })
   role: E_UserType | null;

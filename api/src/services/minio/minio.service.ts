@@ -38,13 +38,35 @@ export class MinioService {
     return 'http://localhost:9000/images/' + fileName;
   }
 
-  async uploadLocalFile(folder: string, filename: string, filepath: string) {
-    const fileContent = fs.readFileSync(filepath);
-    const fileName = `${folder}/${filename}`;
+  async uploadLocalFile(
+    minioFolderPath: string,
+    localFileName: string,
+    localFilePath: string,
+  ) {
+    const fileContent = fs.readFileSync(localFilePath);
+    const minioFilePath = `${minioFolderPath}/${localFileName}`;
 
-    await this.minioClient.putObject(this.bucketName, fileName, fileContent);
+    await this.minioClient.putObject(
+      this.bucketName,
+      minioFilePath,
+      fileContent,
+    );
 
-    return 'http://localhost:9000/images/' + fileName;
+    return 'http://localhost:9000/images/' + minioFilePath;
+  }
+
+  async uploadLocalFolder(minioFolderPath: string, localFolderPath: string) {
+    await fs.readdir(localFolderPath, async (err, files) => {
+      if (files) {
+        for (const file of files) {
+          await this.uploadLocalFile(
+            minioFolderPath,
+            file,
+            `${localFolderPath}/${file}`,
+          );
+        }
+      }
+    });
   }
 
   async getFileUrl(fileName: string) {
@@ -56,7 +78,6 @@ export class MinioService {
   }
 
   async deleteFile(fileName: string) {
-    console.log(fileName);
     await this.minioClient.removeObject(this.bucketName, fileName);
   }
 }
