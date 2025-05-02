@@ -9,7 +9,7 @@ export class DraftController {
 
   @Get('/')
   getDrafts(@User() user) {
-    return this.draftService.get(user.id);
+    return this.draftService.get(user);
   }
 
   @Post('/')
@@ -21,6 +21,6 @@ export class DraftController {
   async deleteDraft(@Param('id') id: string, @User() user) {
     await this.draftService.delete(id);
 
-    return this.draftService.get(user.id);
+    return this.draftService.get(user);
   }
 }

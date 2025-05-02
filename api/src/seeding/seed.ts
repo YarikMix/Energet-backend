@@ -8,6 +8,7 @@ import { OrderFactory } from './order.factory';
 import { ItemFactory, ItemTypeFactory } from './item.factory';
 import { OrderItemFactory } from './orderItem.factory';
 import { FavouriteFactory } from './favourite.factory';
+import { DraftFactory } from './draft.factory';
 
 const options: DataSourceOptions & SeederOptions = {
   ...pgConfig(),
@@ -18,6 +19,7 @@ const options: DataSourceOptions & SeederOptions = {
     OrderItemFactory,
     FavouriteFactory,
     ItemTypeFactory,
+    DraftFactory,
   ],
   seeds: [MainSeeder],
 };

@@ -22,6 +22,7 @@ import {
   TERMO_GENERATOR_MOCKS,
   WIND_GENERATOR_MOCKS,
 } from '../utils/constants';
+import { Draft } from '@entities/draft/models/draft.entity';
 
 const ITEMS_COUNT = 51;
 const ITEMS_IN_ORDER_COUNT = 3;
@@ -29,6 +30,7 @@ const USERS_COUNT = 10;
 const MODERATORS_COUNT = 3;
 const PRODUCERS_COUNT = 5;
 const USER_ORDERS_COUNT = 3;
+const USER_CONFIGURATOR_DRAFTS_COUNT = 5;
 const FAVOURITES_FOR_USER_COUNT = 5;
 
 export class MainSeeder implements Seeder {
@@ -50,6 +52,8 @@ export class MainSeeder implements Seeder {
     await this.generateFavourites(factoryManager, dataSource, users, items);
 
     await this.generateOrders(factoryManager, dataSource, users, items);
+
+    await this.generateDrafts(factoryManager, dataSource, users);
   }
 
   generateFavourites = async (
@@ -302,6 +306,36 @@ export class MainSeeder implements Seeder {
             );
           }),
         );
+      }),
+    );
+  };
+
+  generateDrafts = async (
+    factoryManager: SeederFactoryManager,
+    dataSource: DataSource,
+    users: User[],
+  ) => {
+    console.log('seeding drafts');
+    const draftsRepo = dataSource.getRepository(Draft);
+    const draftFactory = factoryManager.get(Draft);
+
+    console.log('users.length', users.length);
+    await Promise.all(
+      users.map(async (user) => {
+        console.log('user', user);
+        // Создаем черновики конфигуратора покупателю
+        const drafts = await Promise.all(
+          Array(USER_CONFIGURATOR_DRAFTS_COUNT)
+            .fill('')
+            .map(async () => {
+              return await draftFactory.make({
+                owner: user,
+              });
+            }),
+        );
+        console.log('drafts.length', drafts.length);
+        console.log('drafts', drafts);
+        await draftsRepo.save(drafts);
       }),
     );
   };

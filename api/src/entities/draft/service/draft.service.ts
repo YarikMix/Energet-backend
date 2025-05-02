@@ -14,7 +14,7 @@ export class DraftService {
   ) {}
 
   public async get(user: User) {
-    const drafts = await this.draftRepository.find({
+    return await this.draftRepository.find({
       relations: ['owner'],
       where: {
         owner: { id: user.id },
@@ -25,8 +25,6 @@ export class DraftService {
         },
       },
     } as FindOneOptions<Draft>);
-
-    return drafts;
   }
 
   public async create(dto, owner) {
