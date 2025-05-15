@@ -79,13 +79,19 @@ export class ItemsController {
     return item;
   }
 
-  @Public()
-  @Put('/:id/update/')
+  @Put('/:id/')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateItemDto: UpdateItemDto,
   ) {
+    console.log('update');
+    console.log('updateItemDto', updateItemDto);
     return this.itemsService.update(id, updateItemDto);
+  }
+
+  @Delete('/:id/')
+  delete(@Param('id', ParseIntPipe) id: number) {
+    return this.itemsService.delete(id);
   }
 
   @Public()

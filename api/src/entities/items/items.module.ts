@@ -9,6 +9,7 @@ import { MinioService } from '@services/minio/minio.service';
 import { ItemType } from '@entities/items/models/item-type.entity';
 import { ItemProducer } from '@entities/items/models/item-producer.entity';
 import { Favourite } from '@entities/favourite/models/favourite.entity';
+import { User } from '@entities/user/models/user.entity';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { Favourite } from '@entities/favourite/models/favourite.entity';
       ItemType,
       ItemProducer,
       Favourite,
+      User,
     ]),
   ],
   controllers: [ItemsController],

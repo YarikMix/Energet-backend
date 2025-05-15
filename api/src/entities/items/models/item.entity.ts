@@ -1,10 +1,4 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { E_ItemStatus } from '@entities/items/models/types';
 import { User } from '@entities/user/models/user.entity';
 import { ItemType } from '@entities/items/models/item-type.entity';
@@ -53,6 +47,6 @@ export class Item {
   image: string;
 
   @ManyToOne(() => User, (user) => user.id)
-  @JoinColumn({ name: 'user_id' })
+  // @JoinColumn({ name: 'user_id' })
   owner: User;
 }

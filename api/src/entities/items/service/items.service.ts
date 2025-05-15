@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateItemDto } from '../dto/createItem.dto';
 import { UpdateItemDto } from '../dto/updateItem.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
+  Equal,
   FindManyOptions,
   FindOneOptions,
   ILike,
@@ -19,6 +20,9 @@ import { PaginationDto } from '@entities/items/dto/pagination.dto';
 import { ItemsFiltersDto } from '@entities/items/dto/filters.dto';
 import { DEFAULT_PAGE_SIZE } from '../../../utils/constants';
 import { Favourite } from '@entities/favourite/models/favourite.entity';
+import { E_ItemStatus } from '@entities/items/models/types';
+import { User } from '@entities/user/models/user.entity';
+import { E_UserType } from '@entities/user/models/types';
 
 @Injectable()
 export class ItemsService {
@@ -35,6 +39,8 @@ export class ItemsService {
     private readonly orderRepository: Repository<Order>,
     @InjectRepository(Favourite)
     private readonly favouriteRepository: Repository<Favourite>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
   async search({
@@ -73,6 +79,15 @@ export class ItemsService {
       }
     }
 
+    // filters['status'] = Not(E_ItemStatus.Deleted);
+
+    if (userId) {
+      const user = await this.userRepository.findOneBy({ id: userId });
+      if (user.role == E_UserType.Producer) {
+        filters['owner'] = Equal(userId);
+      }
+    }
+
     let items = await this.itemRepository.find({
       relations: ['owner', 'item_type', 'item_producer'],
       select: {
@@ -87,17 +102,20 @@ export class ItemsService {
     } as FindManyOptions<Item>);
 
     if (userId) {
-      items = await Promise.all(
-        items.map(async (item) => {
-          const favourite = await this.favouriteRepository.exists({
-            where: {
-              itemId: item.id,
-              ownerId: userId,
-            },
-          });
-          return { ...item, favourite };
-        }),
-      );
+      const user = await this.userRepository.findOneBy({ id: userId });
+      if (user.role == E_UserType.Buyer) {
+        items = await Promise.all(
+          items.map(async (item) => {
+            const favourite = await this.favouriteRepository.exists({
+              where: {
+                itemId: item.id,
+                ownerId: userId,
+              },
+            });
+            return { ...item, favourite };
+          }),
+        );
+      }
     }
 
     const totalCount = await this.itemRepository.count({ where: filters });
@@ -146,7 +164,25 @@ export class ItemsService {
   }
 
   async update(id: number, updateItemDto: UpdateItemDto) {
-    return await this.itemRepository.update({ id }, updateItemDto);
+    // TODO: return await this.itemRepository.update({ id }, updateItemDto);
+    const item = await this.itemRepository.findOneBy({ id });
+    if (updateItemDto.name) {
+      item.name = updateItemDto.name;
+    }
+    if (updateItemDto.price) {
+      item.price = updateItemDto.price;
+    }
+    if (updateItemDto.power) {
+      item.power = updateItemDto.power;
+    }
+    await this.itemRepository.save(item);
+  }
+
+  async delete(id: number) {
+    const item = await this.itemRepository.findOneBy({ id });
+    if (!item) throw new NotFoundException();
+    item.status = E_ItemStatus.Deleted;
+    return await this.itemRepository.save(item);
   }
 
   async create(createItemDto: CreateItemDto, fileName?: string) {
