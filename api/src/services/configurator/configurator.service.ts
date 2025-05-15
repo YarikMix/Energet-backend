@@ -183,7 +183,17 @@ export class ConfiguratorService {
         }
       }
 
-      return { ...result, RPS: data.RPS, LCOE: data.LCOE };
+      return {
+        ...result,
+        params: {
+          RPS: data.RPS?.toFixed(2),
+          LCOE: data.LCOE?.toFixed(2),
+          CapEx: data.CapEx?.toFixed(2),
+          OpEx: data.OpEx?.toFixed(2),
+          Economy: data.Economy?.toFixed(2),
+          NPV: data.NPV?.toFixed(2),
+        },
+      };
     } catch {
       return null;
     }
