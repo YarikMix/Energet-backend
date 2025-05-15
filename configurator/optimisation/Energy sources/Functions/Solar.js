@@ -61,6 +61,12 @@ class solar {
         return Ans
     }
 
+    K_WintSumm_Binom_V2(index){
+        let New_Ind = ((index/24)+1);
+        let Ans = 1 + (-0.0000054213)*(New_Ind**2) + (0.0019390845)*(New_Ind) + (-0.2338046237);
+        return Ans
+    }
+
     K_WintSumm_Sin(index){
         let Ans;
         let Wint = 0.8; //0.4
@@ -153,6 +159,22 @@ class solar {
         return [POA_front, POA_back]
     }
 
+    POA_V2(Cos_Tetta_0, Cos_Tetta, Cos_TettaPi, GHI, Diffuse){
+        let POA_front = Diffuse, POA_back = Diffuse;
+        if ((Cos_Tetta_0) > 0) {
+            if ((Cos_Tetta) > 0) {
+                POA_front = Diffuse + (GHI-Diffuse)*(Cos_Tetta)/(Cos_Tetta_0);
+                if (POA_front > 1000) POA_front = 1000;
+            }
+            if ((Cos_TettaPi) > 0) {
+                POA_back = Diffuse + (GHI-Diffuse)*(Cos_TettaPi)/(Cos_Tetta_0);
+                if (POA_back > 1000) POA_back = 1000;
+            }
+        }
+
+        return [POA_front, POA_back]
+    }
+
     index_Shad(shading, Gamma_C){
         let index_Shad = [], j = 0;
         let Shad_Gamma = shading.filter(async (element, index, array) => { 
@@ -165,7 +187,138 @@ class solar {
         })
         return index_Shad
     }
+
+    X_F_grd(H, h, a, B, Gamma_C, Gamma){
+        let ans;
+        // let cond_1 = ((Gamma_C > Gamma - (Math.PI/2) + (Math.PI/180)) && (Gamma_C < Gamma + (Math.PI/2) - (Math.PI/180)));
+        // let cond_2 = ((Gamma_C < Gamma - (Math.PI/2) - (Math.PI/180)) || (Gamma_C > Gamma + (Math.PI/2) + (Math.PI/180)));
+        // let cond = cond_1 || cond_2;
+        // if (((a) > 0) && (cond)) ans = (1-Math.cos(B))/2;
+        if ((a) > 5*Math.PI/180) ans = (1-Math.cos(B))/2;
+        else ans = 0;
+        if (ans < 0) ans = 0
+
+        // if ((ans < 0) || (ans > 1)) ans = 0;
+
+        return ans
+    }
     
+    X_R_usgrd(H, h, a, B, Gamma_C, Gamma){
+        let ans;
+        // let cond_1 = ((Gamma_C > Gamma - (Math.PI/2) + (Math.PI/180)) && (Gamma_C < Gamma + (Math.PI/2) - (Math.PI/180)));
+        // let cond_2 = ((Gamma_C < Gamma - (Math.PI/2) - (Math.PI/180)) || (Gamma_C > Gamma + (Math.PI/2) + (Math.PI/180)));
+        // let cond = cond_1 || cond_2;
+        // if (((a) > 0) && (cond)) {
+        if ((a) > 5*Math.PI/180) {
+            let AC = this.AC(H, h, a, B);
+            let EC = this.EC(H, h, a, B);
+            let AE = this.AE(H, h, a, B);
+            let BC = this.BC(H, h, a, B);
+            let BE = this.BE(H, h, a, B);
+            let AB = H;
+            let CF = this.CF(H, h, a, B);
+            let AF = this.AF(H, h, a, B);
+            let BF = this.BF(H, h, a, B);
+            let X_R_EC = this.X_R_EC(AC, EC, AE, BC, BE, AB);
+            let X_R_FY = this.X_R_FY(B, AC, CF, AF, BC, BF, AB);
+            ans = (X_R_FY + X_R_EC);
+            if (ans < 0) ans = 0
+        } else ans = 0;
+
+        // if ((ans < 0) || (ans > 1)) ans = 0;
+        
+        return ans
+    }
+
+    X_R_FY(B, AC, CF, AF, BC, BF, AB){
+        let F_1 = (1+Math.cos(B))/2;
+        let F_2 = (AC+CF-AF)/(2*AC);
+        // if (F_2 < 0) F_2 = 0;
+        let F_3 = (BC+CF-BF)/(2*BC);
+        // if (F_3 < 0) F_3 = 0;
+        return ((F_1-F_2)*AC-(F_1-F_3)*BC)/AB;
+    }
+
+    AC(H, h, a, B){
+        let F_1 = (H*Math.cos(B)+h/Math.tan(B))**2;
+        let F_2 = (h+H*Math.sin(B))**2;
+        return (F_1+F_2)**(1/2)
+    }
+
+    BC(H, h, a, B){
+        return h/Math.sin(B);
+    }
+
+    CF(H, h, a, B){
+        let F_1 = H*Math.sin(a+B)/Math.sin(a);
+        let F_2 = H/Math.tan(B);
+        let F_3 = H/Math.tan(a);
+        return F_1+F_2+F_3;
+    }
+
+    AF(H, h, a, B){
+        let f_1 = H*Math.cos(B);
+        let f_2 = (h*Math.cos(a)+H*Math.cos(a+B))/Math.sin(a)
+        let F_1 = (f_1-f_2)**2;
+        let F_2 = (h+H*Math.sin(B))**2;
+        return (F_1+F_2)**(1/2)
+    }
+
+    BF(H, h, a, B){
+        let F_1 = ((h*Math.cos(a)+H*Math.sin(a+B))/Math.sin(a))**2
+        let F_2 = h**2;
+        return (F_1+F_2)**(1/2)
+    }
+
+    X_R_EC(AC, EC, AE, BC, BE, AB){
+        let F_2 = (AC+EC-AE)/(2*AC);
+        // if (F_2 < 0) F_2 = 0;
+        let F_3 = (BC+EC-BE)/(2*BC);
+        // if (F_3 < 0) F_3 = 0;
+        return ((F_2)*AC-(F_3)*BC)/AB;
+    }
+
+    AE(H, h, a, B){
+        let f_1 = H*Math.cos(B);
+        let f_2 = h/Math.tan(a);
+        let F_1 = (f_1-f_2)**2;
+        let F_2 = (h+H*Math.sin(B))**2;
+        return (F_1+F_2)**(1/2)
+    }
+
+    EC(H, h, a, B){
+        let F_1 = 1/Math.tan(a);
+        let F_2 = 1/Math.tan(B);
+        return h*(F_1+F_2)
+    }
+
+    BE(H, h, a, B){
+        return h/Math.sin(a);
+    }
+
+    X_R_sgrd(H, h, a, B, Gamma_C, Gamma){
+        let ans;
+        // let cond_1 = ((Gamma_C > Gamma - (Math.PI/2) + (Math.PI/180)) && (Gamma_C < Gamma + (Math.PI/2) - (Math.PI/180)));
+        // let cond_2 = ((Gamma_C < Gamma - (Math.PI/2) - (Math.PI/180)) || (Gamma_C > Gamma + (Math.PI/2) + (Math.PI/180)));
+        // let cond = cond_1 || cond_2;
+        // if (((a) > 0) && (cond)) {
+        if ((a) > 5*Math.PI/180) {
+            let AE = this.AE(H, h, a, B);
+            let BF = this.BF(H, h, a, B);
+            let BE = this.BE(H, h, a, B);
+            let AF = this.AF(H, h, a, B);
+            let AB = H;
+            // if (AE < BE) BE = AE;
+            // if (BF < AF) AF = BF;
+            ans = (AE+BF-BE-AF)/(2*AB);
+            if (ans < 0) ans = 0
+        } else ans = 0;
+
+        // if ((ans < 0) || (ans > 1)) ans = 0;
+        
+        return ans
+    }
+
 }
 
 

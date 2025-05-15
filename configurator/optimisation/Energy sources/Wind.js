@@ -8,7 +8,7 @@ class wind {
 
         let power = [];
         const V = {
-            "min": 3,
+            "min": 1.5,
             "max": 11,
             "nom": 10,
             "stop": 18,

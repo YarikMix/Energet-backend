@@ -17,19 +17,57 @@ export class ConfiguratorService {
   async calc(body) {
     try {
       const { data } = await firstValueFrom(
-        this.httpService.post('http://configurator:5000/api/optim/', body),
+        this.httpService.post('http://configurator:5000/api/optim/', {
+          ...body,
+          Econ: {
+            ElCost: 8,
+            Disc_Rate: 0.2,
+            Lifetime: 25,
+          },
+          OptTarget: {
+            target: 'Надежность энергоснабжения (минимизация LCOE)',
+            value: 0.9,
+            d_target: 0.02,
+          },
+          Additions: {
+            pitch: 100,
+            shading: [],
+            WTorient: 22,
+            WTheight: 10,
+            gamma: [0],
+            betta: [30],
+            AB_place: 'Дом',
+            bPV: 0,
+          },
+          Options: {
+            N_steps: 10,
+            step: 0.3333,
+            Test: 0,
+            Zero_S: 0,
+          },
+          Optimisator_Version: 2,
+        }),
       );
+
+      console.log('data', data);
 
       if (!data) {
         return null;
       }
+
+      const vars = data['Vars'];
+      if (!vars) {
+        return null;
+      }
+
+      console.log('vars', vars);
 
       const result = {
         total_price: 0,
         items: [],
       };
 
-      const solarPower = Math.floor(data[0]);
+      const solarPower = Math.floor(vars[0]);
       if (solarPower > 0) {
         const invertor_items = await this.itemRepository.find({
           relations: ['item_type'],
@@ -66,6 +104,9 @@ export class ConfiguratorService {
           return;
         }
 
+        console.log('calculateItemCategory');
+        console.log('item_category', item_category);
+
         let result;
 
         const items = await this.itemRepository.find({
@@ -76,6 +117,8 @@ export class ConfiguratorService {
             },
           },
         } as FindOneOptions<Item>);
+
+        console.log('items[0]', items[0]);
 
         const optimal_items = findOptimalCombinationUnbounded(
           items,
@@ -111,19 +154,19 @@ export class ConfiguratorService {
 
       const categories = [
         {
-          power: data[0],
+          power: vars[0],
           id: 3,
         },
         {
-          power: data[1],
+          power: vars[1],
           id: 4,
         },
         {
-          power: data[2],
+          power: vars[2],
           id: 5,
         },
         {
-          power: data[3],
+          power: vars[3],
           id: 6,
         },
       ];
@@ -140,7 +183,7 @@ export class ConfiguratorService {
         }
       }
 
-      return result;
+      return { ...result, RPS: data.RPS, LCOE: data.LCOE };
     } catch {
       return null;
     }

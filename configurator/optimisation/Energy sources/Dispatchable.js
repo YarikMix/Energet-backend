@@ -15,6 +15,7 @@ class Dispatchable {
 
         let dispPower = maxLack*rPower;
         if (refining == 1) dispPower = rPower;
+        if (refining == 2) dispPower = maxLack;
         let power = [], Energy = [], summ = 0, motoH = 0;
         for (let z = 0; z < Energy_Summ.length; z++) {
             Energy[z] = Energy_Summ[z];
@@ -27,10 +28,9 @@ class Dispatchable {
                     Energy[z] = Energy_Summ[z] + dispPower;
                     power[z] = dispPower;
                 }
-                motoH ++;
             }
 
-            
+            motoH ++;
             summ += power[z];
         }
         motoH = motoH/5000;

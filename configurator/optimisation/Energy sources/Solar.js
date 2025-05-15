@@ -2,7 +2,7 @@ const SolarFunc = require("./Functions/Solar")
 
 class solar {
 
-    production (coords, horisons, shads, GHI, temperature, RatedPower, orient) {
+    production (coords, horisons, shads, GHI, Diffuse, temperature, RatedPower, orient, bPV, Albedo) {
 
         if (RatedPower <= 0) return Array.from({ length: 8760 } ,  (_, i) => 0);
 
@@ -36,10 +36,10 @@ class solar {
         const PV = {
             "T_ref": 38.8,
             "K_T": -2.85*10**(-3),
-            "K_bifacial": 0, //0.9,
+            "K_bifacial": bPV,
             "H": 1
         }
-        
+
         let angle = {
             "D": Array.from({ length: 8760 }, (_, i) => (Math.PI/180)*23.5 * Math.sin( (360/365) * (Math.PI/180) * (days.year[Math.floor(i/24)]-81) )),
             "D_Shifted": Array.from({ length: 8760 }, (_, i) => (Math.PI/180)*23.5 * Math.sin( (360/365) * (Math.PI/180) * (days.year[Math.floor(i/24)]-81) )),
@@ -60,7 +60,6 @@ class solar {
             "Gamma_C": Array.from({ length: 8760 },  (_, i) => SolarFunc.Gamma_S(angle.D[i], angle.W[i],  Cos.Tetta_0_notShift[i])),
             "Alpha": Array.from({ length: 8760 },  (_, i) => (Math.PI/2) - Math.acos( Cos.Tetta_0[i]))
         }
-
         angle_Sun.Gamma_C =  SolarFunc.Rec_Gamma_S(angle_Sun.Gamma_C);
         angle_Sun.Gamma_C = angle_Sun.Gamma_C.splice(angle.shift).concat(angle_Sun.Gamma_C);
 
@@ -89,26 +88,65 @@ class solar {
             "back": Array.from({ length: 8760 }, (_, i) => 0),
             "summ": Array.from({ length: 8760 }, (_, i) => 0),
         }
+let Front_Refl = [], Rear_Refl_G = [], Rear_Refl_D = [];
 
         for (let i = 0; i < 8760; i++) {
-            let Get_POA =  SolarFunc.POA( Cos.Tetta_0[i],  Cos.Tetta[i],  Cos.TettaPi[i], GHI[i]);
-            POA.front[i] = Get_POA[0]*( SolarFunc.K_angle( Cos.Tetta[i]));
-            POA.back[i] = Get_POA[1]*( SolarFunc.K_angle( Cos.TettaPi[i]));
+            
+            let Get_POA = SolarFunc.POA_V2( Cos.Tetta_0[i],  Cos.Tetta[i],  Cos.TettaPi[i], GHI[i], Diffuse[i]);
+            // let Get_POA =  SolarFunc.POA( Cos.Tetta_0[i],  Cos.Tetta[i],  Cos.TettaPi[i], GHI[i]);
+
+            Front_Refl[i] = GHI[i]*Albedo[i]*SolarFunc.X_F_grd(Geometry.H_X[i], 0.5, angle_Sun.Alpha[i], Geometry.Betta_X[i], angle_Sun.Gamma_C[i], orientation.gamma);
+            Rear_Refl_G[i] = GHI[i]*Albedo[i]*SolarFunc.X_R_usgrd(Geometry.H_X[i], 0.5, angle_Sun.Alpha[i], Geometry.Betta_X[i], angle_Sun.Gamma_C[i], orientation.gamma);
+            Rear_Refl_D[i] = Diffuse[i]*Albedo[i]*SolarFunc.X_R_sgrd(Geometry.H_X[i], 0.5, angle_Sun.Alpha[i], Geometry.Betta_X[i], angle_Sun.Gamma_C[i], orientation.gamma);
+
+// yyy1[i] = SolarFunc.X_F_grd(Geometry.H_X[i], 0.5, angle_Sun.Alpha[i], Geometry.Betta_X[i], angle_Sun.Gamma_C[i], orientation.gamma);
+// yyy2[i] = SolarFunc.X_R_usgrd(Geometry.H_X[i], 0.5, angle_Sun.Alpha[i], Geometry.Betta_X[i], angle_Sun.Gamma_C[i], orientation.gamma);
+// yyy3[i] = SolarFunc.X_R_sgrd(Geometry.H_X[i], 0.5, angle_Sun.Alpha[i], Geometry.Betta_X[i], angle_Sun.Gamma_C[i], orientation.gamma);
+
+// yyy1[i] = SolarFunc.X_F_grd(PV.H, 0.5, angle_Sun.Alpha[i], orientation.betta, angle_Sun.Gamma_C[i], orientation.gamma);
+// yyy2[i] = SolarFunc.X_R_usgrd(PV.H, 0.5, angle_Sun.Alpha[i], orientation.betta, angle_Sun.Gamma_C[i], orientation.gamma);
+// yyy3[i] = SolarFunc.X_R_sgrd(PV.H, 0.5, angle_Sun.Alpha[i], orientation.betta, angle_Sun.Gamma_C[i], orientation.gamma);
+
+// yyy1[i] = SolarFunc.AE(Geometry.H_X[i], 0.5, angle_Sun.Alpha[i], Geometry.Betta_X[i]);
+// yyy2[i] = SolarFunc.BF(Geometry.H_X[i], 0.5, angle_Sun.Alpha[i], Geometry.Betta_X[i]);
+// yyy3[i] = SolarFunc.BE(Geometry.H_X[i], 0.5, angle_Sun.Alpha[i], Geometry.Betta_X[i]);
+// yyy4[i] = SolarFunc.AF(Geometry.H_X[i], 0.5, angle_Sun.Alpha[i], Geometry.Betta_X[i]);
+
+// yyy1[i] = SolarFunc.X_F_grd(PV.H, 0.5, angle_Sun.Alpha[i], orientation.betta);
+// yyy2[i] = SolarFunc.X_R_usgrd(PV.H, 0.5, angle_Sun.Alpha[i], orientation.betta);
+// yyy3[i] = SolarFunc.X_R_sgrd(PV.H, 0.5, angle_Sun.Alpha[i], orientation.betta);
+// yyy4[i] = SolarFunc.AF(PV.H, 0.5, angle_Sun.Alpha[i], orientation.betta);
+
+// if (angle_Sun.Alpha[i] > 0) {
+// yyy1[i] = Math.cos(angle_Sun.Alpha[i]);
+// yyy2[i] = Math.sin(angle_Sun.Alpha[i]);
+// yyy3[i] = Math.tan(angle_Sun.Alpha[i]);
+// } else {
+// yyy1[i] = 0;
+// yyy2[i] = 0;
+// yyy3[i] = 0;
+// }
+
+
+            POA.front[i] = Get_POA[0]*(SolarFunc.K_angle(Cos.Tetta[i])) + Front_Refl[i];
+            POA.back[i] = Get_POA[1]*(SolarFunc.K_angle(Cos.TettaPi[i])) + Rear_Refl_G[i] + Rear_Refl_D[i];
+            // POA.front[i] = Get_POA[0]*( SolarFunc.K_angle( Cos.Tetta[i])) + Diffuse[i]*Albedo[i]*SolarFunc.X_F_grd(Geometry.L_X[i], 0.5, angle_Sun.Alpha[i], Geometry.Betta_X[i], Cos.Tetta_0[i]);
+            // POA.back[i] = Get_POA[1]*( SolarFunc.K_angle( Cos.TettaPi[i])) + GHI[i]*Albedo[i]*SolarFunc.X_R_usgrd(Geometry.L_X[i], 0.5, angle_Sun.Alpha[i], Geometry.Betta_X[i], Cos.Tetta_0[i]) + Diffuse[i]*Albedo[i]*SolarFunc.X_R_sgrd(Geometry.L_X[i], 0.5, angle_Sun.Alpha[i], Geometry.Betta_X[i], Cos.Tetta_0[i]);
             POA.summ[i] = Get_POA[0] + Get_POA[1];
 
             if (( Cos.Tetta[i] > 0) && ( angle_Sun.Alpha[i] <  Limit_Alpha.front[i]) && ( Cos.Tetta_0[i] > 0)) {
-                POA.front[i] = 0;
+                POA.front[i] = Diffuse[i];
             }
             if (( Cos.TettaPi[i] > 0) && ( angle_Sun.Alpha[i] <  Limit_Alpha.back[i]) && ( Cos.Tetta_0[i] > 0)) {
-                POA.back[i] = 0;
+                POA.back[i] = Diffuse[i];
             }
  
             let index_Shad =  SolarFunc.index_Shad(shading.gamma,  angle_Sun.Gamma_C[i]);
             if (( index_Shad).length != 0) {
                 index_Shad.forEach( (element, index, array) => { 
                     if ( angle_Sun.Alpha[i] < shading.alpha[element]) {
-                        POA.front[i] = 0;
-                        POA.back[i] = 0;
+                        POA.front[i] = Diffuse[i];
+                        POA.back[i] = Diffuse[i];
                     }
                 });
             }   
@@ -119,8 +157,8 @@ class solar {
                 if (cond) {
                     let alpha_hor = ((horison.alpha[index]-horison.alpha[index+1])*(horison.gamma[index+1]- angle_Sun.Gamma_C[i])/(horison.gamma[index+1]-horison.gamma[index]))+horison.alpha[index+1];
                     if ( angle_Sun.Alpha[i] < alpha_hor) {
-                        POA.front[i] = 0;
-                        POA.back[i] = 0;
+                        POA.front[i] = Diffuse[i];
+                        POA.back[i] = Diffuse[i];
                     }
                 }
             })
@@ -128,13 +166,22 @@ class solar {
             power.front[i] =  SolarFunc.Power(RatedPower, PV.K_T,  SolarFunc.T_PV(temperature[i], GHI[i]), PV.T_ref, POA.front[i]);
             power.back[i] = PV.K_bifacial*  SolarFunc.Power(RatedPower, PV.K_T,  SolarFunc.T_PV(temperature[i], GHI[i]), PV.T_ref, POA.back[i]);
 
-            power.front[i] = power.front[i]*( SolarFunc.K_BoS_P(power.front[i], RatedPower))*( SolarFunc.K_BoS_T(temperature[i]))*0.92*( SolarFunc.K_WintSumm_Sin(i));
-            power.back[i] = power.back[i]*( SolarFunc.K_BoS_P(power.back[i], RatedPower))*( SolarFunc.K_BoS_T(temperature[i]))*0.92*( SolarFunc.K_WintSumm_Sin(i));
+            // power.front[i] = power.front[i]*( SolarFunc.K_BoS_P(power.front[i], RatedPower))*( SolarFunc.K_BoS_T(temperature[i]))*0.92*( SolarFunc.K_WintSumm_Sin(i));
+            // power.back[i] = power.back[i]*( SolarFunc.K_BoS_P(power.back[i], RatedPower))*( SolarFunc.K_BoS_T(temperature[i]))*0.92*( SolarFunc.K_WintSumm_Sin(i));
+
+            // power.front[i] = power.front[i]*( SolarFunc.K_BoS_P(power.front[i], RatedPower))*( SolarFunc.K_BoS_T(temperature[i]))*0.92;
+            // power.back[i] = power.back[i]*( SolarFunc.K_BoS_P(power.back[i], RatedPower))*( SolarFunc.K_BoS_T(temperature[i]))*0.92;
+
+            power.front[i] = power.front[i]*( SolarFunc.K_BoS_P(power.front[i], RatedPower))*( SolarFunc.K_BoS_T(temperature[i]))*0.92*( SolarFunc.K_WintSumm_Binom_V2(i));
+            power.back[i] = power.back[i]*( SolarFunc.K_BoS_P(power.back[i], RatedPower))*( SolarFunc.K_BoS_T(temperature[i]))*0.92*( SolarFunc.K_WintSumm_Binom_V2(i));
+            // power.front[i] = power.front[i]*( SolarFunc.K_BoS_P(power.front[i], RatedPower))*( SolarFunc.K_BoS_T(temperature[i]))
+            // power.back[i] = power.back[i]*( SolarFunc.K_BoS_P(power.back[i], RatedPower))*( SolarFunc.K_BoS_T(temperature[i]))
             power.summ[i] = power.front[i] + power.back[i];
 
         }
 
         return power.summ
+        // return [POA.front, POA.back]
 
     }
 

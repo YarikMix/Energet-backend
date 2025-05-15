@@ -154,6 +154,8 @@ export class MainSeeder implements Seeder {
       }),
     );
 
+    console.log('itemsTypes', itemsTypes);
+
     let itemProducers = await Promise.all(
       ITEM_PRODUCERS.map(async (name) => {
         return await itemsProducerFactory.make({

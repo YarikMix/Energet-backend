@@ -28,7 +28,7 @@ services:
   configurator:
      build:
        dockerfile: Dockerfile
-       context: ./configurator
+       context: configurator
      command: npm run dev
      environment:
        NODE_ENV: development
