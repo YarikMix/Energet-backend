@@ -3,5 +3,5 @@ export enum E_OrderStatus {
   InWork,
   Completed,
   Rejected,
-  Deleted
+  Deleted,
 }

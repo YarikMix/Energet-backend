@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Item } from '@entities/items/models/item.entity';
+import { HttpService } from '@nestjs/axios';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { firstValueFrom } from 'rxjs';
 import { FindOneOptions, Repository } from 'typeorm';
 import { findOptimalCombinationUnbounded } from '../../utils/optimum';
 
@@ -26,7 +26,7 @@ export class ConfiguratorService {
           },
           OptTarget: {
             target: 'Надежность энергоснабжения (минимизация LCOE)',
-            value: 0.9,
+            value: 0.97,
             d_target: 0.02,
           },
           Additions: {

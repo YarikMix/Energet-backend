@@ -1,29 +1,29 @@
+import { ItemsFiltersDto } from '@entities/items/dto/filters.dto';
+import { PaginationDto } from '@entities/items/dto/pagination.dto';
 import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Delete,
-  UseInterceptors,
-  ParseIntPipe,
-  UploadedFile,
   BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpStatus,
+  Param,
+  ParseIntPipe,
+  Post,
   Put,
   Query,
-  Res,
-  HttpStatus,
   Req,
+  Res,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ItemsService } from '../service/items.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Public } from '@services/auth/decorators/public.decorator';
+import { User } from '@services/auth/decorators/user.decorator';
+import { MinioService } from '@services/minio/minio.service';
 import { CreateItemDto } from '../dto/createItem.dto';
 import { UpdateItemDto } from '../dto/updateItem.dto';
-import { Public } from '@services/auth/decorators/public.decorator';
-import { MinioService } from '@services/minio/minio.service';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { PaginationDto } from '@entities/items/dto/pagination.dto';
-import { ItemsFiltersDto } from '@entities/items/dto/filters.dto';
-import { User } from '@services/auth/decorators/user.decorator';
+import { ItemsService } from '../service/items.service';
 
 @Controller('items')
 export class ItemsController {
@@ -84,8 +84,6 @@ export class ItemsController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateItemDto: UpdateItemDto,
   ) {
-    console.log('update');
-    console.log('updateItemDto', updateItemDto);
     return this.itemsService.update(id, updateItemDto);
   }
 

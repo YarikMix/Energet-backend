@@ -1,3 +1,9 @@
+import { DeleteOrderItemsDto } from '@entities/order/dto/deleteOrderItems.dto';
+import { OrdersFiltersDto } from '@entities/order/dto/OrdersFiltersDto';
+import { UpdateOrderDto } from '@entities/order/dto/updateOrder.dto';
+import { UpdateOrderItemCountDto } from '@entities/order/dto/updateOrderItemCount.dto';
+import { OrderService } from '@entities/order/service/order.service';
+import { NotFoundInterceptor } from '@interceptors/interceptors';
 import {
   Body,
   Controller,
@@ -8,15 +14,11 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Query,
   Res,
   UseInterceptors,
 } from '@nestjs/common';
-import { OrderService } from '@entities/order/service/order.service';
-import { UpdateOrderDto } from '@entities/order/dto/updateOrder.dto';
-import { NotFoundInterceptor } from '@interceptors/interceptors';
 import { User } from '@services/auth/decorators/user.decorator';
-import { UpdateOrderItemCountDto } from '@entities/order/dto/updateOrderItemCount.dto';
-import { DeleteOrderItemsDto } from '@entities/order/dto/deleteOrderItems.dto';
 
 @Controller('orders')
 export class OrderController {
@@ -28,8 +30,8 @@ export class OrderController {
   }
 
   @Get('/')
-  getOrders(@User() user) {
-    return this.orderService.getOrders(user);
+  getOrders(@Query() params: OrdersFiltersDto, @User() user) {
+    return this.orderService.getOrders(user.id, params.status);
   }
 
   @Get('/:id')

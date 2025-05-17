@@ -12,6 +12,18 @@ export const OrderFactory = setSeederFactory(Order, () => {
     E_OrderStatus.Completed,
   ]);
   order.created_date = faker.date.past();
-  order.formation_date = faker.date.past();
+
+  if (order.status == E_OrderStatus.InWork) {
+    order.formation_date = faker.date.past();
+  }
+
+  if (
+    order.status == E_OrderStatus.Completed ||
+    order.status == E_OrderStatus.Rejected
+  ) {
+    order.formation_date = faker.date.past();
+    order.complete_date = faker.date.past({ refDate: order.formation_date });
+  }
+
   return order;
 });

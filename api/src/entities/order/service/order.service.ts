@@ -1,16 +1,23 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, FindOneOptions, In, Not, Repository } from 'typeorm';
-import { Order } from '@entities/order/models/order.entity';
-import { UpdateOrderDto } from '@entities/order/dto/updateOrder.dto';
-import { OrderItem } from '@entities/order/models/order-item.entity';
-import { User } from '@entities/user/models/user.entity';
-import { E_OrderStatus } from '@entities/order/models/types';
-import { UpdateOrderItemCountDto } from '@entities/order/dto/updateOrderItemCount.dto';
 import { Favourite } from '@entities/favourite/models/favourite.entity';
 import { Item } from '@entities/items/models/item.entity';
-import { And } from 'typeorm';
-import { Equal } from 'typeorm';
+import { UpdateOrderDto } from '@entities/order/dto/updateOrder.dto';
+import { UpdateOrderItemCountDto } from '@entities/order/dto/updateOrderItemCount.dto';
+import { OrderItem } from '@entities/order/models/order-item.entity';
+import { Order } from '@entities/order/models/order.entity';
+import { E_OrderStatus } from '@entities/order/models/types';
+import { E_UserType } from '@entities/user/models/types';
+import { User } from '@entities/user/models/user.entity';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import {
+  And,
+  Equal,
+  FindManyOptions,
+  FindOneOptions,
+  In,
+  Not,
+  Repository,
+} from 'typeorm';
 
 @Injectable()
 export class OrderService {
@@ -25,24 +32,38 @@ export class OrderService {
     private readonly favouriteRepository: Repository<Favourite>,
   ) {}
 
-  public async getOrders(user: User) {
+  public async getOrders(userId: number, status?: string) {
+    // TODO: FindOptionsWhere<Order>
+    const filters: any = {
+      status: And(
+        Not(Equal(E_OrderStatus.Deleted)),
+        Not(Equal(E_OrderStatus.Draft)),
+      ),
+    };
+
+    if (status) {
+      filters.status = Equal(status);
+    }
+
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (user.role == E_UserType.Buyer) {
+      filters.owner = { id: userId };
+    }
+
     const orders = await this.orderRepository.find({
       relations: ['owner'],
-      where: {
-        owner: { id: user.id },
-        status: And(
-          Not(Equal(E_OrderStatus.Deleted)),
-          Not(Equal(E_OrderStatus.Draft)),
-        ),
-      },
+      where: filters,
       select: {
         owner: {
           id: true,
           name: true,
+          email: true,
+          phone: true,
         },
       },
       order: {
-        formation_date: 'DESC',
+        // formation_date: 'DESC',
+        id: 'ASC',
       },
     } as FindOneOptions<Order>);
 
@@ -64,6 +85,8 @@ export class OrderService {
         owner: {
           id: true,
           name: true,
+          email: true,
+          phone: true,
         },
       },
     } as FindOneOptions<Order>);
@@ -155,6 +178,17 @@ export class OrderService {
   }
 
   public async updateOrder(id: number, updateOrderDto: UpdateOrderDto) {
+    if (
+      updateOrderDto.status == E_OrderStatus.Completed ||
+      updateOrderDto.status == E_OrderStatus.Rejected
+    ) {
+      await this.orderRepository.update(
+        { id },
+        {
+          complete_date: new Date(),
+        },
+      );
+    }
     return await this.orderRepository.update({ id }, updateOrderDto);
   }
 

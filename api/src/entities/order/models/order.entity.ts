@@ -20,6 +20,12 @@ export class Order {
   formation_date: Date;
 
   @Column({
+    type: 'timestamptz',
+    nullable: true,
+  })
+  complete_date: Date;
+
+  @Column({
     name: 'status',
     type: 'enum',
     enum: E_OrderStatus,
