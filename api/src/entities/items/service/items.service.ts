@@ -83,8 +83,38 @@ export class ItemsService {
 
     if (userId) {
       const user = await this.userRepository.findOneBy({ id: userId });
-      if (user.role == E_UserType.Producer) {
+      if (user.role == E_UserType.Moderator) {
+        const items = await this.itemRepository.find({
+          relations: ['owner', 'item_type', 'item_producer'],
+          select: {
+            owner: {
+              id: true,
+              name: true,
+            },
+          },
+          where: filters,
+        } as FindManyOptions<Item>);
+
+        return {
+          items,
+        };
+      } else if (user.role == E_UserType.Producer) {
         filters['owner'] = Equal(userId);
+
+        const items = await this.itemRepository.find({
+          relations: ['owner', 'item_type', 'item_producer'],
+          select: {
+            owner: {
+              id: true,
+              name: true,
+            },
+          },
+          where: filters,
+        } as FindManyOptions<Item>);
+
+        return {
+          items,
+        };
       }
     }
 
