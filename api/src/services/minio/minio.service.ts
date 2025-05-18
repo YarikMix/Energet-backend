@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import * as Minio from 'minio';
 import * as fs from 'fs';
+import * as Minio from 'minio';
 
 @Injectable()
 export class MinioService {
@@ -35,7 +35,7 @@ export class MinioService {
       file.size,
     );
 
-    return 'http://localhost:9000/images/' + fileName;
+    return fileName;
   }
 
   async uploadLocalFile(
@@ -52,7 +52,7 @@ export class MinioService {
       fileContent,
     );
 
-    return 'http://localhost:9000/images/' + minioFilePath;
+    return minioFilePath;
   }
 
   async uploadLocalFolder(minioFolderPath: string, localFolderPath: string) {

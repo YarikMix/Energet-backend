@@ -92,24 +92,24 @@ export class ItemsController {
     return this.itemsService.delete(id);
   }
 
-  @Public()
   @Put('/:id/update_image/')
   // eslint-disable-next-line @typescript-eslint/ban-types
-  @UseInterceptors(FileInterceptor('file') as Function)
+  @UseInterceptors(FileInterceptor('image') as Function)
   async updateImage(
     @Param('id', ParseIntPipe) id: number,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() image: Express.Multer.File,
   ) {
-    if (!file) {
+    if (!image) {
       throw new BadRequestException();
     }
 
-    await this.minioService.uploadFile(`/items/${id}/`, file);
+    await this.minioService.uploadFile(`/items/${id}/`, image);
 
-    await this.itemsService.updateImage(id, file.originalname);
+    await this.itemsService.updateImage(id, image.originalname);
 
     return this.itemsService.findOne(id);
   }
+
   @Delete('/:id')
   remove(@Param('id') id: string) {
     return this.itemsService.remove(+id);

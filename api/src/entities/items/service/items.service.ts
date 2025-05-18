@@ -1,6 +1,15 @@
+import { Favourite } from '@entities/favourite/models/favourite.entity';
+import { ItemsFiltersDto } from '@entities/items/dto/filters.dto';
+import { PaginationDto } from '@entities/items/dto/pagination.dto';
+import { ItemProducer } from '@entities/items/models/item-producer.entity';
+import { ItemType } from '@entities/items/models/item-type.entity';
+import { Item } from '@entities/items/models/item.entity';
+import { E_ItemStatus } from '@entities/items/models/types';
+import { OrderItem } from '@entities/order/models/order-item.entity';
+import { Order } from '@entities/order/models/order.entity';
+import { E_UserType } from '@entities/user/models/types';
+import { User } from '@entities/user/models/user.entity';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateItemDto } from '../dto/createItem.dto';
-import { UpdateItemDto } from '../dto/updateItem.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   Equal,
@@ -10,19 +19,10 @@ import {
   In,
   Repository,
 } from 'typeorm';
-import { Item } from '@entities/items/models/item.entity';
-import { OrderItem } from '@entities/order/models/order-item.entity';
-import { Order } from '@entities/order/models/order.entity';
-import { ItemType } from '@entities/items/models/item-type.entity';
-import { ItemProducer } from '@entities/items/models/item-producer.entity';
-import { isNumeric } from '../../../utils/helpers';
-import { PaginationDto } from '@entities/items/dto/pagination.dto';
-import { ItemsFiltersDto } from '@entities/items/dto/filters.dto';
 import { DEFAULT_PAGE_SIZE } from '../../../utils/constants';
-import { Favourite } from '@entities/favourite/models/favourite.entity';
-import { E_ItemStatus } from '@entities/items/models/types';
-import { User } from '@entities/user/models/user.entity';
-import { E_UserType } from '@entities/user/models/types';
+import { isNumeric } from '../../../utils/helpers';
+import { CreateItemDto } from '../dto/createItem.dto';
+import { UpdateItemDto } from '../dto/updateItem.dto';
 
 @Injectable()
 export class ItemsService {
@@ -211,7 +211,7 @@ export class ItemsService {
     const item = await this.itemRepository.save(itemData);
 
     if (fileName) {
-      item.image = `http://localhost:9000/images/items/${item.id}/${fileName}`;
+      item.image = `${item.id}/${fileName}`;
     }
 
     return item;
@@ -219,7 +219,7 @@ export class ItemsService {
 
   async updateImage(itemId: number, fileName?: string) {
     return await this.itemRepository.update(itemId, {
-      image: `http://localhost:9000/images/items/${itemId}/${fileName}`,
+      image: `items/${itemId}/${fileName}`,
     });
   }
 

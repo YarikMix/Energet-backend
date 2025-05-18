@@ -1,8 +1,8 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { ItemProducer } from '@entities/items/models/item-producer.entity';
+import { ItemType } from '@entities/items/models/item-type.entity';
 import { E_ItemStatus } from '@entities/items/models/types';
 import { User } from '@entities/user/models/user.entity';
-import { ItemType } from '@entities/items/models/item-type.entity';
-import { ItemProducer } from '@entities/items/models/item-producer.entity';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('item')
 export class Item {
@@ -42,7 +42,7 @@ export class Item {
   @Column({
     name: 'image',
     type: 'varchar',
-    default: 'http://localhost:9000/images/items/default.png',
+    default: 'items/default.png',
   })
   image: string;
 
