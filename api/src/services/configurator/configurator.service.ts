@@ -188,9 +188,9 @@ export class ConfiguratorService {
         params: {
           RPS: data.RPS?.toFixed(2),
           LCOE: data.LCOE?.toFixed(2),
-          CapEx: data.CapEx?.toFixed(2),
-          OpEx: data.OpEx?.toFixed(2),
-          Economy: data.Economy?.toFixed(2),
+          CapEx: data.CapEx && Math.ceil(data.CapEx),
+          OpEx: data.OpEx && Math.ceil(data.OpEx),
+          Economy: data.Economy && Math.ceil(data.Economy),
           // NPV: data.NPV?.toFixed(2),
         },
       };
