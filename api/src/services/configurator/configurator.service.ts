@@ -191,7 +191,7 @@ export class ConfiguratorService {
           CapEx: data.CapEx?.toFixed(2),
           OpEx: data.OpEx?.toFixed(2),
           Economy: data.Economy?.toFixed(2),
-          NPV: data.NPV?.toFixed(2),
+          // NPV: data.NPV?.toFixed(2),
         },
       };
     } catch {

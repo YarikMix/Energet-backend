@@ -1,9 +1,9 @@
-import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
 import { registerAs } from '@nestjs/config';
-import * as path from 'path';
 import * as dotenv from 'dotenv';
+import * as path from 'path';
+import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
 
-dotenv.config({ path: process.cwd() + '/.env' });
+dotenv.config({ path: process.cwd() + `/.${process.env.NODE_ENV}.env` });
 
 export default registerAs(
   'dbconfig.dev',

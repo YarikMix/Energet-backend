@@ -1,18 +1,18 @@
+import * as process from 'process';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { runSeeders, SeederOptions } from 'typeorm-extension';
 import pgConfig from '../db/db.config';
-import { MainSeeder } from './main.seeder';
-import * as process from 'process';
-import { UserFactory } from './user.factory';
-import { OrderFactory } from './order.factory';
+import { DraftFactory } from './draft.factory';
+import { FavouriteFactory } from './favourite.factory';
 import {
   ItemFactory,
   ItemProducerFactory,
   ItemTypeFactory,
 } from './item.factory';
+import { MainSeeder } from './main.seeder';
+import { OrderFactory } from './order.factory';
 import { OrderItemFactory } from './orderItem.factory';
-import { FavouriteFactory } from './favourite.factory';
-import { DraftFactory } from './draft.factory';
+import { UserFactory } from './user.factory';
 
 const options: DataSourceOptions & SeederOptions = {
   ...pgConfig(),
