@@ -1,17 +1,17 @@
-import { DataSource } from 'typeorm';
-import { Seeder, SeederFactoryManager } from 'typeorm-extension';
+import { Draft } from '@entities/draft/models/draft.entity';
+import { Favourite } from '@entities/favourite/models/favourite.entity';
+import { ItemProducer } from '@entities/items/models/item-producer.entity';
+import { ItemType } from '@entities/items/models/item-type.entity';
 import { Item } from '@entities/items/models/item.entity';
-import { User } from '@entities/user/models/user.entity';
-import { Order } from '@entities/order/models/order.entity';
 import { OrderItem } from '@entities/order/models/order-item.entity';
-import { faker } from '@faker-js/faker';
+import { Order } from '@entities/order/models/order.entity';
 import { E_OrderStatus } from '@entities/order/models/types';
 import { E_UserType } from '@entities/user/models/types';
+import { User } from '@entities/user/models/user.entity';
+import { faker } from '@faker-js/faker';
 import { MinioService } from '@services/minio/minio.service';
-import { ItemType } from '@entities/items/models/item-type.entity';
-import { ItemProducer } from '@entities/items/models/item-producer.entity';
-import { Favourite } from '@entities/favourite/models/favourite.entity';
-import { generateRandomFloat, generateRandomInt } from '../utils/helpers';
+import { DataSource } from 'typeorm';
+import { Seeder, SeederFactoryManager } from 'typeorm-extension';
 import {
   BATTERY_MOCKS,
   DIESEL_GENERATOR_MOCKS,
@@ -22,7 +22,7 @@ import {
   TERMO_GENERATOR_MOCKS,
   WIND_GENERATOR_MOCKS,
 } from '../utils/constants';
-import { Draft } from '@entities/draft/models/draft.entity';
+import { generateRandomFloat, generateRandomInt } from '../utils/helpers';
 
 const ITEMS_COUNT = 51;
 const ITEMS_IN_ORDER_COUNT = 3;

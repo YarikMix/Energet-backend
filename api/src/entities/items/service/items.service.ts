@@ -184,18 +184,7 @@ export class ItemsService {
   }
 
   async update(id: number, updateItemDto: UpdateItemDto) {
-    // TODO: return await this.itemRepository.update({ id }, updateItemDto);
-    const item = await this.itemRepository.findOneBy({ id });
-    if (updateItemDto.name) {
-      item.name = updateItemDto.name;
-    }
-    if (updateItemDto.price) {
-      item.price = updateItemDto.price;
-    }
-    if (updateItemDto.power) {
-      item.power = updateItemDto.power;
-    }
-    await this.itemRepository.save(item);
+    await this.itemRepository.update({ id }, updateItemDto);
   }
 
   async delete(id: number) {
