@@ -61,20 +61,21 @@ export class ItemsController {
     return this.itemsService.findOne(id, user?.id);
   }
 
-  @Public()
   @Post('/')
   // eslint-disable-next-line @typescript-eslint/ban-types
-  @UseInterceptors(FileInterceptor('file') as Function)
+  @UseInterceptors(FileInterceptor('image') as Function)
   async create(
+    @User() owner,
     @Body() createItemDto: CreateItemDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() image: Express.Multer.File,
   ) {
     const item = await this.itemsService.create(
       createItemDto,
-      file && file.originalname,
+      owner.id,
+      image && image.originalname,
     );
 
-    if (file) await this.minioService.uploadFile(`/items/${item.id}/`, file);
+    if (image) await this.minioService.uploadFile(`/items/${item.id}/`, image);
 
     return item;
   }

@@ -194,13 +194,18 @@ export class ItemsService {
     return await this.itemRepository.save(item);
   }
 
-  async create(createItemDto: CreateItemDto, fileName?: string) {
+  async create(createItemDto: CreateItemDto, ownerId: number, image?: string) {
     const itemData = this.itemRepository.create(createItemDto);
+
+    itemData.owner = await this.userRepository.findOneBy({ id: ownerId });
 
     const item = await this.itemRepository.save(itemData);
 
-    if (fileName) {
-      item.image = `${item.id}/${fileName}`;
+    if (image) {
+      await this.itemRepository.update(
+        { id: item.id },
+        { image: `items/${item.id}/${image}` },
+      );
     }
 
     return item;
