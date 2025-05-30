@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { firstValueFrom } from 'rxjs';
 import { FindOneOptions, Repository } from 'typeorm';
-import { findOptimalCombinationUnbounded } from '../../utils/optimum';
+import { findOptimalCombination } from '../../utils/optimum';
 
 @Injectable()
 export class ConfiguratorService {
@@ -118,12 +118,16 @@ export class ConfiguratorService {
           },
         } as FindOneOptions<Item>);
 
+        console.log('items', items);
         console.log('items[0]', items[0]);
+        console.log('items[1]', items[1]);
+        console.log('items[2]', items[2]);
+        console.log('items[3]', items[3]);
+        console.log('Math.floor(power)', Math.floor(power));
 
-        const optimal_items = findOptimalCombinationUnbounded(
-          items,
-          Math.floor(power),
-        );
+        const optimal_items = findOptimalCombination(items, Math.floor(power));
+
+        console.log('optimal_items', optimal_items);
 
         if (optimal_items.length > 0) {
           result = {
