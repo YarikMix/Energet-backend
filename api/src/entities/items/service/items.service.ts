@@ -17,6 +17,7 @@ import {
   FindOneOptions,
   ILike,
   In,
+  MoreThan,
   Repository,
 } from 'typeorm';
 import { DEFAULT_PAGE_SIZE } from '../../../utils/constants';
@@ -78,6 +79,8 @@ export class ItemsService {
         );
       }
     }
+
+    filters['warehouse_count'] = MoreThan(0);
 
     // filters['status'] = Not(E_ItemStatus.Deleted);
 

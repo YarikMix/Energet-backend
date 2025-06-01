@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { firstValueFrom } from 'rxjs';
 import { FindOneOptions, Repository } from 'typeorm';
-import { findOptimalCombination } from '../../utils/optimum';
+import { findOptimalCombination } from '../../utils/findOptimalCombination';
 
 @Injectable()
 export class ConfiguratorService {

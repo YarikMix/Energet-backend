@@ -10,6 +10,7 @@ export const ItemFactory = setSeederFactory(Item, () => {
   item.name = faker.vehicle.model();
   item.weight = faker.helpers.rangeToNumber({ min: 1, max: 100 });
   item.status = E_ItemStatus.Created;
+  item.warehouse_count = faker.helpers.rangeToNumber({ min: 10, max: 50 });
   return item;
 });
 

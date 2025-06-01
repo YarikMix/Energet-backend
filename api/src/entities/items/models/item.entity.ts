@@ -31,6 +31,9 @@ export class Item {
   @Column({ name: 'power', type: 'int', nullable: true })
   power: number;
 
+  @Column({ name: 'warehouse_count', type: 'int', nullable: true })
+  warehouse_count: number;
+
   @Column({
     name: 'status',
     type: 'enum',

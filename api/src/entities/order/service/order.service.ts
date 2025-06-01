@@ -26,6 +26,8 @@ export class OrderService {
     private readonly orderRepository: Repository<Order>,
     @InjectRepository(OrderItem)
     private readonly orderItemRepository: Repository<OrderItem>,
+    @InjectRepository(Item)
+    private readonly itemRepository: Repository<Item>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(Favourite)
@@ -228,6 +230,19 @@ export class OrderService {
   }
 
   public async updateOrderStatusUser(id: number) {
+    const orderItems = await this.orderItemRepository.find({
+      relations: {
+        item: true,
+      },
+      where: { orderId: id },
+    } as FindManyOptions<OrderItem>);
+
+    for (const orderItem of orderItems) {
+      await this.itemRepository.update(orderItem.itemId, {
+        warehouse_count: orderItem.item.warehouse_count - orderItem.count,
+      });
+    }
+
     return await this.orderRepository.update(
       { id },
       { status: E_OrderStatus.InWork, formation_date: new Date() },
